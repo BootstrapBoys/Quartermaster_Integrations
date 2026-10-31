@@ -128,9 +128,12 @@ internal static class Program
         var wil = Load(mlc, DepPath("WardIsLove.dll"));
         Method(wil, "WardIsLove.Util.CustomCheck", "CheckAccess", new[] { "Int64", "Vector3", "Single", "Boolean" }, "Boolean", true);
 
-        // ---- WardIsLove host range: every range read the transpiler rewrites --------------------
+        // ---- WardIsLove host range: every Quartermaster/WIL member the filter relies on ----------
         Method(qm, "Quartermaster.CraftStorageAccess", "Nearby", new[] { "Player" }, "IEnumerable`1", true);
+        Method(qm, "Quartermaster.CraftStorageAccess", "CanSupply", new[] { "Container" }, "Boolean", true);
         Method(qm, "Quartermaster.SharedCrafting", "SourcesValid", new[] { "Player", "Container[]" }, "Boolean", true);
+        Field(qm, "Quartermaster.ContainerRegistry", "All", "List`1", true);
+        Method(qm, "Quartermaster.ContainerRegistry", "GetSettings", new[] { "Container" }, "ChestSettings", true);
         Field(qm, "Quartermaster.Plugin", "CraftRange", "ConfigEntry`1", true);
         Method(wil, "WardIsLove.Extensions.WardMonoscriptExt", "GetWardRadius", new[] { "WardMonoscript" }, "Single", true);
         Field(vh, "PrivateArea", "m_allAreas", "List`1", true);

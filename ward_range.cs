@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using BepInEx.Configuration;
 using HarmonyLib;
 using UnityEngine;
@@ -9,37 +9,51 @@ using UnityEngine;
 namespace Quartermaster_Integrations
 {
     /// <summary>
-    /// While the player is inside a WardIsLove ward, that ward's radius becomes the crafting and
-    /// storage range. WardIsLove is the host: its per-ward radius (the value its own UI edits, which
-    /// can differ from the vanilla ward's) replaces Quartermaster's CraftRange for everything that
-    /// range touches - the crafting window's counts, the max-craft number, and which chests a craft
-    /// is allowed to pull from. Outside every ward nothing changes.
+    /// Lets a WardIsLove ward act as the shared range for storage inside it.
     ///
-    /// Why a transpiler instead of adding counts on top: Quartermaster decides range in one place
-    /// (CraftStorageAccess.Nearby) and re-checks it when validating a craft (SharedCrafting.
-    /// SourcesValid). Widening the displayed number without widening those would let the UI promise
-    /// materials the craft then refuses, or worse, let a craft pass with materials it cannot take.
-    /// Substituting the radius keeps counting and withdrawal on the same answer.
+    /// Inside a ward the bubble is the region: a permitted chest anywhere in that ward counts from
+    /// anywhere in the same ward, with no distance test. A chest outside every ward the player is
+    /// standing in keeps Quartermaster's normal CraftRange behaviour, and everything behaves exactly
+    /// as before when the player is outside all wards.
     ///
-    /// Off switch: `1. General > WardHostRange`. When off, or when WardIsLove is absent, neither
-    /// patch is applied and Quartermaster behaves exactly as before.
+    /// This replaces Quartermaster's container list rather than its radius number, because "inside
+    /// this ward" is a region test, not a distance from the player: swapping only the radius would
+    /// still skip a chest at the far edge of a large ward and could reach one outside it.
+    ///
+    /// Two seams, matching where Quartermaster decides range:
+    ///  * CraftStorageAccess.Nearby    - the source list behind counts, max-craft and CraftStores
+    ///  * SharedCrafting.SourcesValid  - the validation a craft must pass before it pulls
+    /// Both are patched, so what the window shows and what a craft may take stay identical.
     /// </summary>
     public static class WardHostRange
     {
         public static bool IsReady { get; private set; }
         public static string BindError { get; private set; }
 
+        /// <summary>A WardIsLove ward the player is currently standing in.</summary>
+        private struct Bubble
+        {
+            public Vector3 Centre;
+            public float Radius;
+        }
+
         private static ConfigEntry<float> _craftRange;
+        private static List<Container> _allContainers;
+        private static Func<Container, bool> _canSupply;
+        private static Func<Container, bool> _craftingSupply;
         private static FieldInfo _allAreas;
         private static Type _wardType;
         private static MethodInfo _getWardRadius;
 
-        // Radius lookup runs inside Quartermaster's per-check range read, so it is memoised per frame.
-        private static int _cacheFrame = -1;
-        private static float _cachedRadius;
+        private static readonly List<Bubble> PlayerBubbles = new List<Bubble>();
+        private static int _bubbleFrame = -1;
 
-        // Set by the transpiler so a silent no-match cannot masquerade as a working patch.
-        private static int _replacements;
+        // Quartermaster asks for this list more than once per frame (counts and CraftStores), and
+        // each container costs a settings read, so the result is reused within the frame.
+        private static List<Container> _cachedSources;
+        private static int _cachedSourcesFrame = -1;
+
+        private static float _lastLogTime;
 
         public static bool Active =>
             IsReady &&
@@ -55,12 +69,17 @@ namespace Quartermaster_Integrations
             {
                 Assembly qm = BridgePlugin.QuartermasterAssembly;
                 Type pluginType = qm?.GetType("Quartermaster.Plugin");
-                Type transfersType = qm?.GetType("Quartermaster.CraftStorageAccess");
+                Type transfers = qm?.GetType("Quartermaster.CraftStorageAccess");
+                Type registry = qm?.GetType("Quartermaster.ContainerRegistry");
                 Type sharedCrafting = qm?.GetType("Quartermaster.SharedCrafting");
 
                 _craftRange = AccessTools.Field(pluginType, "CraftRange")?.GetValue(null) as ConfigEntry<float>;
-                _allAreas = AccessTools.Field(typeof(PrivateArea), "m_allAreas");
+                _allContainers = AccessTools.Field(registry, "All")?.GetValue(null) as List<Container>;
 
+                MethodInfo canSupply = AccessTools.Method(transfers, "CanSupply", new[] { typeof(Container) });
+                MethodInfo getSettings = AccessTools.Method(registry, "GetSettings", new[] { typeof(Container) });
+
+                _allAreas = AccessTools.Field(typeof(PrivateArea), "m_allAreas");
                 _wardType = wardIsLoveAssembly.GetType("WardIsLove.Util.WardMonoscript");
                 _getWardRadius = _wardType == null
                     ? null
@@ -69,56 +88,58 @@ namespace Quartermaster_Integrations
                         "GetWardRadius",
                         new[] { _wardType });
 
-                MethodInfo nearby = transfersType == null
+                MethodInfo nearby = transfers == null
                     ? null
-                    : AccessTools.Method(transfersType, "Nearby", new[] { typeof(Player) });
+                    : AccessTools.Method(transfers, "Nearby", new[] { typeof(Player) });
 
                 MethodInfo sourcesValid = sharedCrafting == null
                     ? null
                     : AccessTools.Method(sharedCrafting, "SourcesValid", new[] { typeof(Player), typeof(Container[]) });
 
-                if (_craftRange == null || _allAreas == null || _wardType == null || _getWardRadius == null ||
+                FieldInfo supplyField = getSettings?.ReturnType.GetField(
+                    "CraftingSupply",
+                    BindingFlags.Public | BindingFlags.Instance);
+
+                if (_craftRange == null || _allContainers == null || canSupply == null || supplyField == null ||
+                    _allAreas == null || _wardType == null || _getWardRadius == null ||
                     nearby == null || sourcesValid == null)
                 {
                     BindError =
-                        $"CraftRange={_craftRange != null}, m_allAreas={_allAreas != null}, " +
-                        $"WardMonoscript={_wardType != null}, GetWardRadius={_getWardRadius != null}, " +
-                        $"CraftStorageAccess.Nearby={nearby != null}, SourcesValid={sourcesValid != null}";
+                        $"CraftRange={_craftRange != null}, ContainerRegistry.All={_allContainers != null}, " +
+                        $"CanSupply={canSupply != null}, CraftingSupply={supplyField != null}, " +
+                        $"m_allAreas={_allAreas != null}, WardMonoscript={_wardType != null}, " +
+                        $"GetWardRadius={_getWardRadius != null}, Nearby={nearby != null}, SourcesValid={sourcesValid != null}";
 
                     QIDebugger.LogError("[WardHostRange] Bindings incomplete: " + BindError);
                     return;
                 }
 
-                // Nearby is a plain method in 0.1.66 (it ends in ToArray), but if Quartermaster ever
-                // makes it an iterator the body moves to MoveNext - patch whichever actually holds the
-                // read. Same for SourcesValid, whose distance test lives in a compiler-generated
-                // predicate rather than in the method itself.
-                int counted = PatchCandidates(
+                _canSupply = (Func<Container, bool>)Delegate.CreateDelegate(typeof(Func<Container, bool>), canSupply);
+
+                // GetSettings returns an internal struct, so the supply flag is read through the
+                // struct's own field rather than a typed delegate.
+                _craftingSupply = container =>
+                    (bool)supplyField.GetValue(getSettings.Invoke(null, new object[] { container }));
+
+                bool counted = HarmonyPatchGuard.TryPatch(
                     harmony,
-                    "counting",
                     nearby,
-                    AccessTools.EnumeratorMoveNext(nearby));
+                    "Quartermaster.CraftStorageAccess.Nearby",
+                    prefix: new HarmonyMethod(typeof(WardHostRange), nameof(Nearby_Prefix)));
 
-                int validated = PatchCandidates(
+                bool validated = HarmonyPatchGuard.TryPatch(
                     harmony,
-                    "validation",
                     sourcesValid,
-                    FindPredicate(sharedCrafting, "SourcesValid"));
+                    "Quartermaster.SharedCrafting.SourcesValid",
+                    prefix: new HarmonyMethod(typeof(WardHostRange), nameof(SourcesValid_Prefix)));
 
-                IsReady = counted > 0 && validated > 0;
+                IsReady = counted && validated;
 
-                if (QIDebugger.Enabled)
+                if (IsReady && QIDebugger.Enabled)
                 {
                     QIDebugger.LogDebug(
-                        $"[WardHostRange] Replaced range reads: counting={counted}, validation={validated} " +
+                        "[WardHostRange] Ward bubbles are the shared storage range " +
                         $"(toggle is {(BridgePlugin.WardHostRange.Value ? "on" : "off")}).");
-                }
-
-                if (!IsReady)
-                {
-                    BindError = $"range reads replaced: counting={counted}, validation={validated}";
-                    QIDebugger.LogError(
-                        "[WardHostRange] Quartermaster's range reads moved; ward range is not applied. " + BindError);
                 }
             }
             catch (Exception ex)
@@ -128,115 +149,128 @@ namespace Quartermaster_Integrations
         }
 
         /// <summary>
-        /// Applies the range-read transpiler to every candidate that exists and reports how many
-        /// reads were actually rewritten across them. A candidate with no read is a no-op patch,
-        /// which is harmless; requiring a non-zero total is what catches a moved signature.
+        /// Replaces Quartermaster's "every container within CraftRange of the player" with
+        /// "within CraftRange, or inside a ward the player is standing in".
         /// </summary>
-        private static int PatchCandidates(Harmony harmony, string label, params MethodBase[] candidates)
+        public static bool Nearby_Prefix(Player player, ref IEnumerable<Container> __result)
         {
-            int total = 0;
+            if (!Active || player == null) return true;
 
-            foreach (MethodBase candidate in candidates)
-            {
-                if (candidate == null) continue;
-
-                _replacements = 0;
-                bool applied = HarmonyPatchGuard.TryPatch(
-                    harmony,
-                    candidate,
-                    $"{label}:{candidate.DeclaringType?.Name}.{candidate.Name}",
-                    transpiler: new HarmonyMethod(typeof(WardHostRange), nameof(ReplaceRangeRead)));
-
-                if (applied) total += _replacements;
-            }
-
-            return total;
-        }
-
-        /// <summary>
-        /// Finds the compiler-generated predicate a method delegates to (for example
-        /// '&lt;SourcesValid&gt;b__0' inside a display class), which is where an inline range test
-        /// actually lives once a lambda captures the player.
-        /// </summary>
-        private static MethodInfo FindPredicate(Type type, string owner)
-        {
-            if (type == null) return null;
-
-            foreach (Type nested in type.GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic))
-            {
-                if (!nested.Name.Contains("<" + owner + ">")) continue;
-
-                foreach (MethodInfo method in nested.GetMethods(
-                             BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
-                {
-                    if (method.Name.Contains("b__")) return method;
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Swaps every `ConfigEntry&lt;float&gt;.Value` read in the target for a call to
-        /// <see cref="EffectiveRange"/>. The instance is popped because the replaced callvirt
-        /// consumed it and pushed the float.
-        /// </summary>
-        private static IEnumerable<CodeInstruction> ReplaceRangeRead(IEnumerable<CodeInstruction> instructions)
-        {
-            MethodInfo getter = AccessTools.PropertyGetter(typeof(ConfigEntry<float>), "Value");
-            MethodInfo replacement = AccessTools.Method(typeof(WardHostRange), nameof(EffectiveRange));
-
-            if (getter == null || replacement == null)
-            {
-                foreach (CodeInstruction instruction in instructions) yield return instruction;
-                yield break;
-            }
-
-            foreach (CodeInstruction instruction in instructions)
-            {
-                if ((instruction.opcode == OpCodes.Callvirt || instruction.opcode == OpCodes.Call) &&
-                    Equals(instruction.operand, getter))
-                {
-                    _replacements++;
-
-                    // Keep any branch labels attached to the instruction being replaced.
-                    yield return new CodeInstruction(OpCodes.Pop) { labels = instruction.labels };
-                    yield return new CodeInstruction(OpCodes.Call, replacement);
-                    continue;
-                }
-
-                yield return instruction;
-            }
-        }
-
-        /// <summary>
-        /// The radius Quartermaster should use right now: the ward's own radius while the player
-        /// stands in one, otherwise Quartermaster's configured CraftRange.
-        /// </summary>
-        public static float EffectiveRange()
-        {
-            float craftRange = _craftRange != null ? _craftRange.Value : 100f;
-            if (!Active) return craftRange;
-
-            float wardRadius = CurrentWardRadius();
-            return wardRadius > 0f ? wardRadius : craftRange;
-        }
-
-        /// <summary>
-        /// Largest WardIsLove ward radius containing the player, or 0 when they are in none.
-        /// </summary>
-        private static float CurrentWardRadius()
-        {
-            Player player = Player.m_localPlayer;
-            if (player == null) return 0f;
+            List<Bubble> bubbles = BubblesAround(player);
+            if (bubbles.Count == 0) return true;   // outside every ward: Quartermaster's own rules
 
             int frame = Time.frameCount;
-            if (frame == _cacheFrame) return _cachedRadius;
+            if (_cachedSourcesFrame == frame && _cachedSources != null)
+            {
+                __result = _cachedSources;
+                return false;
+            }
 
-            _cacheFrame = frame;
-            _cachedRadius = 0f;
+            List<Container> sources = new List<Container>();
+            float rangeSq = CraftRangeSquared();
+            Vector3 playerPosition = player.transform.position;
 
-            if (!(_allAreas.GetValue(null) is List<PrivateArea> areas)) return 0f;
+            foreach (Container container in _allContainers)
+            {
+                if (container == null) continue;
+
+                try
+                {
+                    if (!_canSupply(container) || !_craftingSupply(container)) continue;
+
+                    Vector3 position = container.transform.position;
+                    bool withinRange = (position - playerPosition).sqrMagnitude <= rangeSq;
+                    bool insideBubble = InsideAnyBubble(position, bubbles) &&
+                                        WardIsLoveIntegration.IsPermitted(player, container);
+
+                    if (!withinRange && !insideBubble) continue;
+
+                    sources.Add(container);
+                }
+                catch (Exception ex)
+                {
+                    QIDebugger.LogDebug("[WardHostRange] Skipped a container while filtering", ex);
+                }
+            }
+
+            // Distance first, then instance id for a stable order - Quartermaster itself drains the
+            // nearest eligible chests first.
+            sources.Sort((a, b) =>
+            {
+                float da = (a.transform.position - playerPosition).sqrMagnitude;
+                float db = (b.transform.position - playerPosition).sqrMagnitude;
+                return da != db ? da.CompareTo(db) : a.GetInstanceID().CompareTo(b.GetInstanceID());
+            });
+
+            if (QIDebugger.Enabled && Time.time - _lastLogTime > 10f)
+            {
+                _lastLogTime = Time.time;
+                QIDebugger.LogDebug(
+                    $"[WardHostRange] {sources.Count} container(s) available across {bubbles.Count} ward bubble(s).");
+            }
+
+            __result = sources;
+            _cachedSources = sources;
+            _cachedSourcesFrame = frame;
+            return false;
+        }
+
+        /// <summary>
+        /// Quartermaster re-checks that every chosen source is still within CraftRange before it
+        /// pulls. A chest admitted by the bubble rule would fail that test, so the same rule is
+        /// applied here - otherwise the window would offer materials the craft then refuses.
+        /// </summary>
+        public static bool SourcesValid_Prefix(Player player, Container[] sources, ref bool __result)
+        {
+            if (!Active || player == null || sources == null) return true;
+
+            List<Bubble> bubbles = BubblesAround(player);
+            if (bubbles.Count == 0) return true;
+
+            float rangeSq = CraftRangeSquared();
+            Vector3 playerPosition = player.transform.position;
+
+            __result = sources.All(container =>
+            {
+                if (container == null) return false;
+
+                try
+                {
+                    if (!_canSupply(container) || !_craftingSupply(container)) return false;
+
+                    Vector3 position = container.transform.position;
+                    if ((position - playerPosition).sqrMagnitude <= rangeSq) return true;
+
+                    return InsideAnyBubble(position, bubbles) && WardIsLoveIntegration.IsPermitted(player, container);
+                }
+                catch
+                {
+                    return false;
+                }
+            });
+
+            return false;
+        }
+
+        private static float CraftRangeSquared()
+        {
+            float range = _craftRange != null ? _craftRange.Value : 100f;
+            return range * range;
+        }
+
+        /// <summary>
+        /// WardIsLove wards containing the player this frame. Empty means they stand outside every
+        /// ward, which is the signal to leave Quartermaster completely alone.
+        /// </summary>
+        private static List<Bubble> BubblesAround(Player player)
+        {
+            int frame = Time.frameCount;
+            if (frame == _bubbleFrame) return PlayerBubbles;
+
+            _bubbleFrame = frame;
+            PlayerBubbles.Clear();
+
+            if (!(_allAreas.GetValue(null) is List<PrivateArea> areas)) return PlayerBubbles;
 
             Vector3 playerPosition = player.transform.position;
 
@@ -246,26 +280,35 @@ namespace Quartermaster_Integrations
 
                 try
                 {
-                    // Only wards WardIsLove is actually hosting count; a plain vanilla ward keeps
-                    // Quartermaster's own radius.
+                    // Only wards WardIsLove hosts; a plain vanilla ward keeps Quartermaster's rules.
                     Component ward = area.GetComponent(_wardType);
                     if (ward == null) continue;
 
                     float radius = (float)_getWardRadius.Invoke(null, new object[] { ward });
                     if (radius <= 0f) continue;
 
-                    // Inside test in XZ, matching how the ward itself measures its bubble.
-                    if (Utils.DistanceXZ(area.transform.position, playerPosition) > radius) continue;
+                    Vector3 centre = area.transform.position;
+                    if (Utils.DistanceXZ(centre, playerPosition) > radius) continue;
 
-                    if (radius > _cachedRadius) _cachedRadius = radius;
+                    PlayerBubbles.Add(new Bubble { Centre = centre, Radius = radius });
                 }
                 catch (Exception ex)
                 {
-                    QIDebugger.LogError("[WardHostRange] Failed to read a ward radius", ex);
+                    QIDebugger.LogError("[WardHostRange] Failed to read a ward bubble", ex);
                 }
             }
 
-            return _cachedRadius;
+            return PlayerBubbles;
+        }
+
+        private static bool InsideAnyBubble(Vector3 position, List<Bubble> bubbles)
+        {
+            foreach (Bubble bubble in bubbles)
+            {
+                if (Utils.DistanceXZ(bubble.Centre, position) <= bubble.Radius) return true;
+            }
+
+            return false;
         }
     }
 }

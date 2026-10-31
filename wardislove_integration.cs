@@ -114,6 +114,16 @@ namespace Quartermaster_Integrations
         }
 
         /// <summary>
+        /// True when WardIsLove (if present) allows this player to use the container. Always true
+        /// when WardIsLove is absent, so callers do not need to branch.
+        /// </summary>
+        public static bool IsPermitted(Player player, Container container)
+        {
+            if (!IsReady || player == null || container == null) return true;
+            return !IsBlocked(player, container);
+        }
+
+        /// <summary>
         /// Skips Quartermaster's own availability calculation for a container the local player is not
         /// permitted to use. Returning true leaves the original method (and its result) untouched.
         /// </summary>

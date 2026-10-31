@@ -32,8 +32,7 @@ namespace Quartermaster_Integrations
             string label,
             HarmonyMethod prefix = null,
             HarmonyMethod postfix = null,
-            HarmonyMethod finalizer = null,
-            HarmonyMethod transpiler = null)
+            HarmonyMethod finalizer = null)
         {
             if (harmony == null) return false;
 
@@ -46,7 +45,7 @@ namespace Quartermaster_Integrations
             try
             {
                 // The 5-argument overload is [Obsolete(..., error: true)] in HarmonyX 2.x.
-                harmony.Patch(target, prefix, postfix, transpiler, finalizer, null);
+                harmony.Patch(target, prefix, postfix, null, finalizer, null);
                 if (QIDebugger.Enabled) QIDebugger.LogDebug($"[Patch] '{label}' applied.");
                 return true;
             }

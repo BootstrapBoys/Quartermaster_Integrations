@@ -29,7 +29,7 @@ Puts Quartermaster's nearby storage into the crafting window: how much of each i
 | **AAABuildMenu** (`Azumatt.AAABuildMenu`) | No — 1.0.6+ | Pinned build rows show storage-inclusive have/need counts |
 | **Epic Loot** (`randyknapp.mods.epicloot`) | No — 0.15.5+ | Enchanting and sacrifice costs can be paid from storage; the items are actually taken from the chests |
 | **PlanBuild** (`marcopogo.PlanBuild`) | No — 0.20.0+ | Plan pieces can be placed from storage, including "hold to add materials" |
-| **WardIsLove** (`Azumatt.WardIsLove`) | No — 4.0.9+ | Chests inside a ward you are not permitted on are excluded from counts and never pulled from; while inside a ward, its radius becomes the crafting and storage range (`WardHostRange`) |
+| **WardIsLove** (`Azumatt.WardIsLove`) | No — 4.0.9+ | Chests inside a ward you are not permitted on are excluded from counts and never pulled from; while you stand in a ward, its bubble becomes the storage range (`WardHostRange`) |
 
 Every optional integration is reflection-bound at startup and reports what it found. Missing one costs you that specific convenience, never the mod itself.
 
@@ -71,7 +71,7 @@ Generated at `BepInEx/config/com.bootstrapboys.quartermaster_integrations.cfg` o
 | `1. General` | `Enabled` | `true` | Turn the mod's UI changes off without uninstalling. |
 | `1. General` | `RequirementDisplayMode` | `CombinedTotal` | How the available count is written (see below). |
 | `1. General` | `DeferToOtherFormatting` | `false` | If AAA Crafting or AdventureBackpacks has already formatted a row, leave its text alone. Only enable this if you prefer their style. My Little UI's own "available resources amount" counts your pockets only, so deferring to it drops chest totals. |
-| `1. General` | `WardHostRange` | `true` | **WardIsLove only.** While you are inside one of its wards, the ward's radius replaces Quartermaster's `CraftRange` for counts, max-craft and which chests a craft may pull from. The per-ward radius WardIsLove itself edits wins, even when it is smaller. Outside a ward, `CraftRange` applies as normal. |
+| `1. General` | `WardHostRange` | `true` | **WardIsLove only.** While you are standing inside one of its wards, that ward's bubble is the storage range: a chest anywhere in the same ward counts from anywhere in it, with no distance test. Chests outside every ward you stand in keep `CraftRange`; standing outside all wards restores normal behaviour. Ward permissions still apply. |
 | `2. Visuals` | `SufficientColor` | `(0.68, 0.91, 0.90, 1.00)` | Color of the available count when you have enough. |
 | `2. Visuals` | `InsufficientFlashBrightColor` | `(1.00, 0.22, 0.22, 1.00)` | Bright end of the insufficient-material flash. |
 | `2. Visuals` | `InsufficientFlashDarkColor` | `(0.45, 0.02, 0.02, 1.00)` | Dark end of the insufficient-material flash. |
@@ -108,7 +108,7 @@ Set `DebugMode = true` under `3. Debug` and the mod writes `BepInEx/BSBLogs/Quar
 | `[EpicLoot] Took N/Mx '<item>' from storage` | an Epic Loot cost was actually paid out of a chest |
 | `[PlanBuild] Plan costs include N storage container(s)` | PlanBuild is being offered storage (one line per 10 s) |
 | `[WardIsLove] Excluded '<chest>' … from storage` | ward permissions hid a chest from storage (one line per 10 s) |
-| `[WardHostRange] Patched counting=…, validation=…` | the ward radius replaced Quartermaster's range in both places |
+| `[WardHostRange] N container(s) available across M ward bubble(s)` | storage counted across the ward you are standing in (one line per 10 s) |
 
 ---
 
@@ -139,6 +139,6 @@ All three are enforced by Quartermaster, not by this mod, so the display follows
 
 **PlanBuild or WardIsLove not taking effect?** Both need `QM storages: True` in the load line plus their own flag in `[Integrations]`. WardIsLove only ever removes containers: a chest outside every ward is never affected, and inside a ward where you are permitted nothing changes.
 
-**`WardHostRange` changed your reach?** That is the point of the toggle: inside a WardIsLove ward, the ward's own radius (the value WardIsLove's UI edits) is the range, so a ward smaller than Quartermaster's `CraftRange` will pull the range in while you stand in it. Set `WardHostRange = false` to always use `CraftRange`. `[WardHostRange] Patched counting=True, validation=True` in the debug log confirms it bound.
+**`WardHostRange` and a chest that won't count?** The chest has to be inside the *same* ward you are standing in, that ward has to be hosted by WardIsLove, and the chest still needs Crafting Supply on, must not be in use, and must be a chest you are permitted on. A chest outside every ward you stand in is measured with `CraftRange` as usual. `[WardHostRange] N container(s) available across M ward bubble(s)` in the debug log shows what the bubble is contributing.
 
 **Something else?** Set `DebugMode = true`, reproduce the issue, and include both `BepInEx/BSBLogs/QuarterMaster_Integrations.log` and `BepInEx/LogOutput.log` in your bug report.

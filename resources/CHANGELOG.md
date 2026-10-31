@@ -10,10 +10,11 @@ Every version that gets built is listed here, newest first — including builds 
 
 ### Added
 
-* **WardIsLove host range** (`1. General > WardHostRange`, default on). While you are inside a WardIsLove ward, that ward's own radius becomes the crafting and storage range: the crafting window's counts, the max-craft number and the chests a craft may pull from all use the ward radius instead of Quartermaster's CraftRange. The bubble and your storage range become the same thing.
-  * WardIsLove is the host: the per-ward radius its own UI edits wins, including when it is smaller than CraftRange. Outside every ward, Quartermaster's CraftRange applies unchanged.
-  * Applied at Quartermaster's own range reads, used by both counting and craft validation, so the number the window shows is the number a craft can actually take.
-  * Only wards WardIsLove is hosting are affected; a plain vanilla ward keeps Quartermaster's range.
+* **WardIsLove shared range** (`1. General > WardHostRange`, default on). While you are standing inside a WardIsLove ward, that ward's bubble is the storage range: a chest anywhere inside the same ward counts from anywhere inside it, with no distance test. Chests outside every ward you are standing in keep Quartermaster's CraftRange, and standing outside all wards restores normal behaviour completely.
+  * Membership is by region, not radius, so a chest at the far side of a large ward counts even though it is further away than that ward's radius.
+  * Ward permissions still decide: a chest inside the ward that you are not permitted on is neither counted nor pulled from.
+  * Applied at both of Quartermaster's range decisions - the source list and the pre-pull validation - so the window's counts, the max-craft number and what a craft actually takes agree.
+  * Only wards WardIsLove hosts are affected; a plain vanilla ward keeps Quartermaster's range.
 
 ---
 
