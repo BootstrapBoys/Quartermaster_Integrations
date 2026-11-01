@@ -107,7 +107,7 @@ namespace Quartermaster_Integrations
         /// <summary>DropMoreLoot only: let its stack multiplier win instead of MaximumStackSize.</summary>
         public static ConfigEntry<bool> DeferToDropMoreLootStacks;
         public static ConfigEntry<bool> ForgetRemovesEntry;
-        public static ConfigEntry<bool> StackAcrossCrafters;
+        public static ConfigEntry<bool> IgnoreCrafter;
         public static ConfigEntry<Color> SufficientResourceColor;
         public static ConfigEntry<Color> InsufficientFlashBrightColor;
         public static ConfigEntry<Color> InsufficientFlashDarkColor;
@@ -235,9 +235,9 @@ namespace Quartermaster_Integrations
                 "storage. With this on, Forget and Forget All remove the entry from the chest outright, " +
                 "so the row disappears and putting a sample back teaches the chest again.");
 
-            StackAcrossCrafters = Config.Bind(
+            IgnoreCrafter = Config.Bind(
                 "4. Patches",
-                "StackAcrossCrafters",
+                "IgnoreCrafter",
                 false,
                 "Quartermaster only. It refuses to merge two stacks whose crafter differs, so core wood " +
                 "crafted at a bench will not stack with core wood you picked up - vanilla ignores the " +

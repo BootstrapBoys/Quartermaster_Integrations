@@ -10,7 +10,7 @@ namespace Quartermaster_Integrations
     /// will not stack with core wood you picked up. Vanilla does not care: Inventory.FindFreeStackItem
     /// compares name, quality and world level only. The extra rule is Quartermaster's own.
     ///
-    /// With StackAcrossCrafters on, the comparison is repeated here without the crafter fields and the
+    /// With IgnoreCrafter on, the comparison is repeated here without the crafter fields and the
     /// merge runs when that is the only difference. Deliberately narrow: stackable items only, and the
     /// quality, variant, world level, durability, cheat flag and custom data must all still match - so
     /// gear, Epic Loot world levels and enchant data keep Quartermaster's rule untouched.
@@ -49,7 +49,7 @@ namespace Quartermaster_Integrations
                 {
                     QIDebugger.LogDebug(
                         "[Stacks] Merge-across-crafters " +
-                        (BridgePlugin.StackAcrossCrafters != null && BridgePlugin.StackAcrossCrafters.Value
+                        (BridgePlugin.IgnoreCrafter != null && BridgePlugin.IgnoreCrafter.Value
                             ? "enabled."
                             : "disabled: Quartermaster keeps crafted and looted stacks apart."));
                 }
@@ -65,7 +65,7 @@ namespace Quartermaster_Integrations
         /// </summary>
         public static bool Stackable_Prefix(ItemDrop.ItemData a, ItemDrop.ItemData b, ref bool __result)
         {
-            if (BridgePlugin.StackAcrossCrafters == null || !BridgePlugin.StackAcrossCrafters.Value) return true;
+            if (BridgePlugin.IgnoreCrafter == null || !BridgePlugin.IgnoreCrafter.Value) return true;
             if (!Mergeable(a, b)) return true;
 
             __result = true;
