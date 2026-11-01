@@ -185,7 +185,7 @@ namespace Quartermaster_Integrations
         public static void IsProtectedPlayerSlot_Coords_Postfix(int x, int y, ref bool __result)
         {
             if (__result) return;
-            if (!BridgePlugin.Enabled) return;
+            if (!BridgePlugin.Enabled || !IsReady) return;
 
             if (IsExtraSlotPosition(x, y))
             {
@@ -196,7 +196,7 @@ namespace Quartermaster_Integrations
         public static void IsProtectedPlayerSlot_Item_Postfix(ItemDrop.ItemData item, ref bool __result)
         {
             if (__result || item == null) return;
-            if (!BridgePlugin.Enabled) return;
+            if (!BridgePlugin.Enabled || !IsReady) return;
 
             if (IsItemInExtraSlot(item))
             {

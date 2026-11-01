@@ -273,7 +273,7 @@ namespace Quartermaster_Integrations
 
         public static void GetItemsInCloseContainers_Postfix(string itemName, ref int __result)
         {
-            if (!BridgePlugin.Enabled) return;
+            if (!BridgePlugin.Enabled || !IsReady) return;
 
             Player player = Player.m_localPlayer;
             if (player == null) return;
@@ -291,7 +291,7 @@ namespace Quartermaster_Integrations
 
         public static void CalculateMaxCraftAmount_Postfix(ref int __result)
         {
-            if (!BridgePlugin.Enabled) return;
+            if (!BridgePlugin.Enabled || !IsReady) return;
 
             InventoryGui gui = InventoryGui.instance;
             Player player = Player.m_localPlayer;

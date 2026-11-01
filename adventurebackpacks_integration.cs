@@ -225,7 +225,7 @@ namespace Quartermaster_Integrations
         public static bool Container_TakeAll_Prefix(Container __instance, ref bool __result)
         {
             if (!InQuartermasterSortOrStore) return true;
-            if (!BridgePlugin.Enabled) return true;
+            if (!BridgePlugin.Enabled || !IsReady) return true;
 
             if (IsBackpackProxyContainer(__instance))
             {
@@ -241,7 +241,7 @@ namespace Quartermaster_Integrations
         public static bool Container_TakeAll_Prefix_NoResult(Container __instance)
         {
             if (!InQuartermasterSortOrStore) return true;
-            if (!BridgePlugin.Enabled) return true;
+            if (!BridgePlugin.Enabled || !IsReady) return true;
 
             return !IsBackpackProxyContainer(__instance);
         }
@@ -251,7 +251,7 @@ namespace Quartermaster_Integrations
         {
             __state = null;
             if (!IsReady || inventory == null) return;
-            if (!BridgePlugin.Enabled) return;
+            if (!BridgePlugin.Enabled || !IsReady) return;
 
             InQuartermasterSortOrStore = true;
 
@@ -297,7 +297,7 @@ namespace Quartermaster_Integrations
 
         public static bool BlockBackpackContainerOp_Prefix(Player player, Container container, ref int __result)
         {
-            if (!BridgePlugin.Enabled) return true;
+            if (!BridgePlugin.Enabled || !IsReady) return true;
 
             if (IsBackpackProxyContainer(container))
             {
@@ -360,7 +360,7 @@ namespace Quartermaster_Integrations
         [HarmonyPriority(Priority.Last)]
         public static void Postfix(InventoryGui __instance)
         {
-            if (!BridgePlugin.Enabled) return;
+            if (!BridgePlugin.Enabled || !AdventureBackpacksIntegration.IsReady) return;
             if (!AdventureBackpacksIntegration.IsReady || !InventoryGui.IsVisible()) return;
 
             if (AdventureBackpacksIntegration.IsBackpackOpen())

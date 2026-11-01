@@ -75,7 +75,7 @@ namespace Quartermaster_Integrations
 
         public static void CountItem_Postfix(Inventory inv, string sharedName, ref int __result)
         {
-            if (!BridgePlugin.Enabled) return;
+            if (!BridgePlugin.Enabled || !IsReady) return;
 
             Player player = Player.m_localPlayer;
             if (player == null || inv == null || string.IsNullOrEmpty(sharedName)) return;
