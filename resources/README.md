@@ -27,7 +27,7 @@ Puts Quartermaster's nearby storage into the crafting window: how much of each i
 | **ExtraSlots** (`shudnal.ExtraSlots`) | No — 1.2.21+ | Slot rows and typed slots survive Quartermaster's sort/store |
 | **AdventureBackpacks** (`vapok.mods.adventurebackpacks`) | No — 2.4.6+ | Backpack contents excluded from counts, backpack proxy never a store target |
 | **AAABuildMenu** (`Azumatt.AAABuildMenu`) | No — 1.0.6+ | Pinned build rows show storage-inclusive have/need counts |
-| **Epic Loot** (`randyknapp.mods.epicloot`) | No — 0.15.5+ | Enchanting and sacrifice costs can be paid from storage; the items are actually taken from the chests |
+| **Epic Loot** (`randyknapp.mods.epicloot`) | No — 0.15.5+ | Enchanting and sacrifice costs can be paid from storage; the items are actually taken from the chests. **Not compatible with EpicLootContainerBridge** — that bridge already reports storage, so the provider stays off while it is installed |
 | **PlanBuild** (`marcopogo.PlanBuild`) | No — 0.20.0+ | Plan pieces can be placed from storage, including "hold to add materials" |
 | **WardIsLove** (`Azumatt.WardIsLove`) | No — 4.0.9+ | Chests inside a ward you are not permitted on are excluded from counts and never pulled from; a Deposit Chest inside a ward runs its whole base on that bubble (`WardHostRange`) |
 | **Wizardry** (`Therzie.Wizardry`) | No — 1.2.3+ | Its wizard table, arcane forge, weaving loom and potion cauldron reach base storage across the table's `BaseRange` |
@@ -143,7 +143,7 @@ Quartermaster Integrations v<version> loaded (MLUI: True, AAA: True, ExtraSlots:
 
 All three are enforced by Quartermaster, not by this mod, so the display follows them exactly.
 
-**Installed EpicLootContainerBridge too?** This mod refuses to register its Epic Loot provider while that bridge is present, because Epic Loot sums every provider and your chest totals would double. Remove the bridge to use this integration instead; the `[EpicLoot]` error in the log names the conflict.
+**EpicLootContainerBridge is not compatible.** Epic Loot sums every registered provider, and that bridge already reports Quartermaster storage — with both installed every cost doubles. The integration detects the bridge and stays off, logging a warning at startup. Remove one of the two; there is no setting to run both.
 
 **Epic Loot's enchanting UI lists storage items?** Epic Loot has a `SpendOnlyStorageMods` setting. Add `bootstrapboys.quartermaster` to it if you want storage to pay costs without showing up as editable inventory in menus that move items around.
 

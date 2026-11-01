@@ -39,14 +39,14 @@ namespace Quartermaster_Integrations
                 return;
             }
 
-            // Epic Loot sums every registered provider. A bridge that already reports Quartermaster
-            // storage would double every total, so refuse rather than silently inflating costs.
+            // Not compatible: Epic Loot sums every registered provider, and EpicLootContainerBridge already
+            // reports Quartermaster storage - with both, every total doubles. Refuse outright.
             if (Chainloader.PluginInfos.ContainsKey(BridgePlugin.EpicLootContainerBridgeGUID))
             {
-                QIDebugger.LogError(
-                    "[EpicLoot] EpicLootContainerBridge is installed and already reports Quartermaster storage. " +
-                    "Not registering a second provider - Epic Loot sums all providers and totals would double. " +
-                    "Remove EpicLootContainerBridge to use this integration instead.");
+                BridgePlugin.Log?.LogWarning(
+                    "[EpicLoot] Incompatible mod detected: EpicLootContainerBridge is installed and already " +
+                    "reports Quartermaster storage to Epic Loot. Both together double every total, so this " +
+                    "integration stays off - run one of the two.");
                 return;
             }
 
