@@ -155,13 +155,13 @@ namespace Quartermaster_Integrations
         {
             Log = Logger;
 
-            ModEnabled = Config.Bind(
+ModEnabled = Config.Bind(
                 "1. General",
                 "Enabled",
                 true,
                 ConfigOrder.Description("Enable or disable the Quartermaster Integrations mod.", 100));
 
-            DisplayMode = Config.Bind(
+DisplayMode = Config.Bind(
                 "1. General",
                 "RequirementDisplayMode",
                 RequirementDisplayMode.CombinedTotal,
@@ -170,16 +170,46 @@ namespace Quartermaster_Integrations
                 "SplitInventoryAndStorage = 10 (4+12) [Req (Inv+QM)]\n" +
                 "TotalWithSplit = 10 (16 [4+12])");
 
-            DeferToOtherFormatting = Config.Bind(
-                "1. General",
+DebugMode = Config.Bind(
+                "2. Debug",
+                "DebugMode",
+                false,
+                "Enable detailed debug logging to file and console.");
+
+SufficientResourceColor = Config.Bind(
+                "3. Visuals",
+                "SufficientColor",
+                new Color(0.68f, 0.91f, 0.90f, 1f),
+                "Text color for available resource counts when you have enough components.");
+
+InsufficientFlashBrightColor = Config.Bind(
+                "3. Visuals",
+                "InsufficientFlashBrightColor",
+                new Color(1f, 0.22f, 0.22f, 1f),
+                "Primary bright red color when flashing insufficient crafting requirements.");
+
+InsufficientFlashDarkColor = Config.Bind(
+                "3. Visuals",
+                "InsufficientFlashDarkColor",
+                new Color(0.45f, 0.02f, 0.02f, 1f),
+                "Secondary dark red color when flashing insufficient crafting requirements.");
+
+FlashSpeed = Config.Bind(
+                "3. Visuals",
+                "FlashSpeed",
+                4.0f,
+                new ConfigDescription("Flashing speed when lacking components to craft.", new AcceptableValueRange<float>(1f, 12f)));
+
+DeferToOtherFormatting = Config.Bind(
+                "4. Patches",
                 "DeferToOtherFormatting",
                 false,
                 "Leave the requirement amount text alone when another mod (AAA Crafting, AdventureBackpacks) " +
                 "has already formatted it. Vanilla's own text is a bare number, so this only triggers when " +
                 "something else has decorated the row. Enable it if you prefer their 'have/need' display.");
 
-            DeferToDropMoreLootStacks = Config.Bind(
-                "1. General",
+DeferToDropMoreLootStacks = Config.Bind(
+                "4. Patches",
                 "DeferToDropMoreLootStacks",
                 true,
                 "DropMoreLoot only. When DropMoreLoot's own stacking is enabled, its stack multiplier " +
@@ -187,37 +217,7 @@ namespace Quartermaster_Integrations
                 "stack tab says so. Turn this off to keep Quartermaster's stack override, which replaces " +
                 "DropMoreLoot's multiplied value.");
 
-            DebugMode = Config.Bind(
-                "2. Debug",
-                "DebugMode",
-                false,
-                "Enable detailed debug logging to file and console.");
-
-            SufficientResourceColor = Config.Bind(
-                "3. Visuals",
-                "SufficientColor",
-                new Color(0.68f, 0.91f, 0.90f, 1f),
-                "Text color for available resource counts when you have enough components.");
-
-            InsufficientFlashBrightColor = Config.Bind(
-                "3. Visuals",
-                "InsufficientFlashBrightColor",
-                new Color(1f, 0.22f, 0.22f, 1f),
-                "Primary bright red color when flashing insufficient crafting requirements.");
-
-            InsufficientFlashDarkColor = Config.Bind(
-                "3. Visuals",
-                "InsufficientFlashDarkColor",
-                new Color(0.45f, 0.02f, 0.02f, 1f),
-                "Secondary dark red color when flashing insufficient crafting requirements.");
-
-            FlashSpeed = Config.Bind(
-                "3. Visuals",
-                "FlashSpeed",
-                4.0f,
-                new ConfigDescription("Flashing speed when lacking components to craft.", new AcceptableValueRange<float>(1f, 12f)));
-
-            WardHostRange = Config.Bind(
+WardHostRange = Config.Bind(
                 "4. Patches",
                 "WardHostRange",
                 true,
@@ -226,7 +226,7 @@ namespace Quartermaster_Integrations
                 "a craft may pull from - the ward bubble and your storage range become the same thing. " +
                 "Outside a ward nothing changes. Turn this off to always use Quartermaster's CraftRange.");
 
-            ForgetRemovesEntry = Config.Bind(
+ForgetRemovesEntry = Config.Bind(
                 "4. Patches",
                 "ForgetRemovesEntry",
                 false,
@@ -235,7 +235,7 @@ namespace Quartermaster_Integrations
                 "storage. With this on, Forget and Forget All remove the entry from the chest outright, " +
                 "so the row disappears and putting a sample back teaches the chest again.");
 
-            IgnoreCrafter = Config.Bind(
+IgnoreCrafter = Config.Bind(
                 "4. Patches",
                 "IgnoreCrafter",
                 false,
