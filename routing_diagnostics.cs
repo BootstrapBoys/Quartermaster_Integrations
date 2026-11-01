@@ -218,9 +218,28 @@ namespace Quartermaster_Integrations
                     $"forgotten={Remembered(settings, _forgotten).Contains(id)}");
             }
 
+            QIDebugger.LogDebug($"[Routing]   item id='{id}', shared='{item.m_shared.m_name}'");
+
             if (found == 0)
             {
                 QIDebugger.LogDebug("[Routing]   no chest in the world remembers this item id");
+
+                // Show what chests do remember, so a prefab-name vs shared-name mismatch is visible.
+                int sampled = 0;
+                foreach (Container chest in _allContainers)
+                {
+                    if (chest == null) continue;
+
+                    object settings = _getSettings.Invoke(null, new object[] { chest });
+                    List<string> entries = Remembered(settings);
+                    if (entries.Count == 0) continue;
+
+                    QIDebugger.LogDebug(
+                        $"[Routing]   '{chest.m_name}' remembers: " +
+                        string.Join(", ", entries.GetRange(0, Math.Min(3, entries.Count))));
+
+                    if (++sampled >= 3) break;
+                }
             }
         }
 

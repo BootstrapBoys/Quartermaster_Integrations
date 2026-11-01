@@ -6,6 +6,12 @@ Every version that gets built is listed here, newest first — including builds 
 
 ---
 
+## [2.7.5] - 2026-11-01
+
+Internal only: routing diagnostics print the item id Quartermaster compares with and sample what chests actually remember. No functional or display changes.
+
+---
+
 ## [2.7.4] - 2026-11-01
 
 Internal only: routing diagnostics now report where an item is assigned and why that chest is not a destination. No functional or display changes.

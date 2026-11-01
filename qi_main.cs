@@ -79,7 +79,7 @@ namespace Quartermaster_Integrations
         //
         // Versioning: bug fixes bump the patch digit (2.4.2 -> 2.4.3); adding an integration bumps the
         // minor and resets the patch (2.4.3 -> 2.5.0). Every bump gets a changelog entry.
-        public const string PluginVersion = "2.7.4";
+        public const string PluginVersion = "2.7.5";
 
         public const string QuartermasterGUID = "local.valheim.quartermaster";
         public const string MLUIGUID = "shudnal.MyLittleUI";
