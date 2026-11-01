@@ -41,8 +41,9 @@ namespace Quartermaster_Integrations
         private static List<Container> _allContainers;
         private static Func<Container, bool> _canSupply;
         private static Func<Container, bool> _craftingSupply;
-        private static FieldInfo _allAreas;
         private static Type _wardType;
+        private static FieldInfo _wardInstances;
+        private static MethodInfo _wardEnabled;
         private static MethodInfo _getWardRadius;
 
         private static Type _baseNetworkType;
@@ -62,6 +63,10 @@ namespace Quartermaster_Integrations
         private static List<Container> _cachedSources;
         private static int _cachedSourcesFrame = -1;
         private static float _lastLogTime;
+
+        // Debug heartbeat state.
+        private static int _lastWardState = -1;
+        private static float _lastWardRadius;
 
         public static bool Active =>
             IsReady &&
@@ -85,8 +90,13 @@ namespace Quartermaster_Integrations
                 MethodInfo canSupply = AccessTools.Method(transfers, "CanSupply", new[] { typeof(Container) });
                 MethodInfo getSettings = AccessTools.Method(registry, "GetSettings", new[] { typeof(Container) });
 
-                _allAreas = AccessTools.Field(typeof(PrivateArea), "m_allAreas");
                 _wardType = wardIsLoveAssembly.GetType("WardIsLove.Util.WardMonoscript");
+                _wardInstances = _wardType?.GetField(
+                    "m_wardInstances",
+                    BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                _wardEnabled = _wardType == null
+                    ? null
+                    : AccessTools.Method(_wardType, "IsEnabled", Type.EmptyTypes);
                 _getWardRadius = _wardType == null
                     ? null
                     : AccessTools.Method(
@@ -117,13 +127,13 @@ namespace Quartermaster_Integrations
                     : AccessTools.Method(_baseNetworkType, "CanTransfer", new[] { typeof(Vector3), typeof(Vector3) });
 
                 if (_allContainers == null || canSupply == null || supplyField == null ||
-                    _allAreas == null || _wardType == null || _getWardRadius == null ||
+                    _wardType == null || _wardInstances == null || _wardEnabled == null || _getWardRadius == null ||
                     nearby == null || sourcesValid == null ||
                     contains == null || canTransfer == null || _networksField == null)
                 {
                     BindError =
                         $"CanSupply={canSupply != null}, CraftingSupply={supplyField != null}, " +
-                        $"m_allAreas={_allAreas != null}, WardMonoscript={_wardType != null}, " +
+                        $"wardInstances={_wardInstances != null}, IsEnabled={_wardEnabled != null}, " +
                         $"GetWardRadius={_getWardRadius != null}, Nearby={nearby != null}, " +
                         $"SourcesValid={sourcesValid != null}, Contains={contains != null}, " +
                         $"CanTransfer={canTransfer != null}, " +
@@ -388,6 +398,31 @@ namespace Quartermaster_Integrations
             return false;
         }
 
+        /// <summary>
+        /// Debug-only heartbeat, called while the game runs: states the ward situation whenever it
+        /// changes. The range code is demand-driven (a crafting window or a cost has to ask), so
+        /// without this a walk through a ward leaves no evidence at all.
+        /// </summary>
+        public static void LogState()
+        {
+            if (!Active) return;
+
+            Player player = Player.m_localPlayer;
+            if (player == null) return;
+
+            List<Bubble> wards = PlayerWards(player);
+            float radius = wards.Count > 0 ? wards[0].Radius : 0f;
+
+            if (wards.Count == _lastWardState && Math.Abs(radius - _lastWardRadius) < 0.05f) return;
+
+            _lastWardState = wards.Count;
+            _lastWardRadius = radius;
+
+            QIDebugger.LogDebug(wards.Count == 0
+                ? "[WardHostRange] outside every ward - Quartermaster range applies."
+                : $"[WardHostRange] inside {wards.Count} ward bubble(s), radius {radius:0.#} m - the bubble is the range.");
+        }
+
         private static List<Bubble> PlayerWards(Player player)
         {
             List<Bubble> wards = AllWards();
@@ -423,22 +458,23 @@ namespace Quartermaster_Integrations
             Wards.Clear();
             NetworkWard.Clear();
 
-            if (!(_allAreas.GetValue(null) is List<PrivateArea> areas)) return Wards;
+            // WardIsLove replaces the vanilla guard stone with its own prefab, so its wards are not in
+            // PrivateArea.m_allAreas at all; m_wardInstances is the list Quartermaster-facing code has
+            // to read. A ward switched off in WardIsLove's own UI is ignored.
+            if (!(_wardInstances.GetValue(null) is IEnumerable instances)) return Wards;
 
-            foreach (PrivateArea area in areas)
+            foreach (object entry in instances)
             {
-                if (area == null) continue;
+                if (!(entry is Component ward) || ward == null) continue;
 
                 try
                 {
-                    // Only wards WardIsLove hosts; a plain vanilla ward keeps Quartermaster's rules.
-                    Component ward = area.GetComponent(_wardType);
-                    if (ward == null) continue;
+                    if (!(bool)_wardEnabled.Invoke(ward, null)) continue;
 
                     float radius = (float)_getWardRadius.Invoke(null, new object[] { ward });
                     if (radius <= 0f) continue;
 
-                    Wards.Add(new Bubble { Centre = area.transform.position, Radius = radius });
+                    Wards.Add(new Bubble { Centre = ward.transform.position, Radius = radius });
                 }
                 catch (Exception ex)
                 {

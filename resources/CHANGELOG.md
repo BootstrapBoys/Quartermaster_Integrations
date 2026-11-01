@@ -6,6 +6,14 @@ Every version that gets built is listed here, newest first — including builds 
 
 ---
 
+## [2.6.4] - 2026-11-01
+
+### Fixed
+
+* **WardIsLove wards were never seen, so every ward rule silently did nothing.** WardIsLove replaces the vanilla guard stone with its own prefab, so its wards are absent from `PrivateArea.m_allAreas` - the list that was being read. Wards now come from WardIsLove's own `WardMonoscript.m_wardInstances`, and a ward switched off in its UI is ignored.
+
+---
+
 ## [2.6.3] - 2026-11-01
 
 Internal only: dead code and redundant work removed. No functional or display changes.

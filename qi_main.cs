@@ -77,7 +77,7 @@ namespace Quartermaster_Integrations
         //
         // Versioning: bug fixes bump the patch digit (2.4.2 -> 2.4.3); adding an integration bumps the
         // minor and resets the patch (2.4.3 -> 2.5.0). Every bump gets a changelog entry.
-        public const string PluginVersion = "2.6.3";
+        public const string PluginVersion = "2.6.4";
 
         public const string QuartermasterGUID = "local.valheim.quartermaster";
         public const string MLUIGUID = "shudnal.MyLittleUI";
@@ -249,6 +249,19 @@ namespace Quartermaster_Integrations
         {
             EpicLootIntegration.Unregister();
             _harmony?.UnpatchSelf();
+        }
+
+        // Debug-only heartbeat: proves ward entry/exit without needing a crafting window open. The
+        // range code itself is demand-driven, so a plain walk-through would otherwise leave no trace.
+        private float _nextWardProbe;
+
+        private void Update()
+        {
+            if (!QIDebugger.Enabled) return;
+            if (Time.time < _nextWardProbe) return;
+
+            _nextWardProbe = Time.time + 0.5f;
+            Quartermaster_Integrations.WardHostRange.LogState();
         }
 
         public static bool Enabled => ModEnabled == null || ModEnabled.Value;

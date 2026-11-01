@@ -142,8 +142,9 @@ internal static class Program
         Field(qm, "Quartermaster.ContainerRegistry", "All", "List`1", true);
         Method(qm, "Quartermaster.ContainerRegistry", "GetSettings", new[] { "Container" }, "ChestSettings", true);
         Field(qm, "Quartermaster.Plugin", "CraftRange", "ConfigEntry`1", true);
+        Field(wil, "WardIsLove.Util.WardMonoscript", "m_wardInstances", "List`1", true);
+        Method(wil, "WardIsLove.Util.WardMonoscript", "IsEnabled", new string[0], "Boolean", false);
         Method(wil, "WardIsLove.Extensions.WardMonoscriptExt", "GetWardRadius", new[] { "WardMonoscript" }, "Single", true);
-        Field(vh, "PrivateArea", "m_allAreas", "List`1", true);
         Method(ut, "Utils", "DistanceXZ", new[] { "Vector3", "Vector3" }, "Single", true);
 
         Console.WriteLine("\n### versions audited");

@@ -7,9 +7,9 @@
 
     <!-- Keep in sync with BridgePlugin.PluginVersion, resources/manifest.json and resources/CHANGELOG.md
          Versioning: fixes bump the patch digit, a new integration bumps the minor and resets the patch. -->
-    <Version>2.6.3</Version>
-    <AssemblyVersion>2.6.3.0</AssemblyVersion>
-    <FileVersion>2.6.3.0</FileVersion>
+    <Version>2.6.4</Version>
+    <AssemblyVersion>2.6.4.0</AssemblyVersion>
+    <FileVersion>2.6.4.0</FileVersion>
 
     <LangVersion>latest</LangVersion>
 

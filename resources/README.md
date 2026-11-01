@@ -109,6 +109,7 @@ Set `DebugMode = true` under `3. Debug` and the mod writes `BepInEx/BSBLogs/Quar
 | `[PlanBuild] Plan costs include N storage container(s)` | PlanBuild is being offered storage (one line per 10 s) |
 | `[WardIsLove] Excluded '<chest>' … from storage` | ward permissions hid a chest from storage (one line per 10 s) |
 | `[WardHostRange] N container(s) reachable inside M ward bubble(s)` | what the bubble is contributing to crafting (one line per 10 s) |
+| `[WardHostRange] inside N ward bubble(s), radius …` / `outside every ward` | entry/exit of a WardIsLove ward, checked twice a second (debug only) |
 
 ---
 
