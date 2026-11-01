@@ -82,6 +82,7 @@ Generated at `BepInEx/config/com.bootstrapboys.quartermaster_integrations.cfg` o
 | `3. Visuals` | `InsufficientFlashDarkColor` | `(0.45, 0.02, 0.02, 1.00)` | Dark end of the insufficient-material flash. |
 | `3. Visuals` | `FlashSpeed` | `4.0` | Flash speed, 1–12. |
 | `2. Debug` | `DebugMode` | `false` | Timestamped diagnostic log written to `BepInEx/BSBLogs/QuarterMaster_Integrations.log`. |
+| `2. Debug` | `EnableAAACrafting`, `EnableAAABuildMenu`, `EnableMyLittleUI`, `EnableExtraSlots`, `EnableAdventureBackpacks`, `EnableEpicLoot`, `EnablePlanBuild`, `EnableWardIsLove`, `EnableWizardry`, `EnableDropMoreLoot` | `true` | One switch per integration, all under 2. Debug next to `DebugMode`. Off means that mod is left entirely alone: no storage counts, no filtered chests, no patched UI. Changes apply immediately, no restart. Turning everything off leaves Quartermaster behaving as if this mod were not installed. |
 
 ### Display modes
 

@@ -25,7 +25,10 @@ namespace Quartermaster_Integrations
         // Stable id; Epic Loot lists it in its spend-only config and reports it in errors.
         public const string ProviderId = "bootstrapboys.quartermaster";
 
-        public static bool IsReady { get; private set; }
+        private static bool _ready;
+
+        /// <summary>False while its switch under 2. Debug is off, so turning it off applies at once.</summary>
+        public static bool IsReady => _ready && BridgePlugin.IntegrationOn(BridgePlugin.EnableEpicLoot);
 
         private static Type _apiType;
 
@@ -83,7 +86,7 @@ namespace Quartermaster_Integrations
                     (Func<ItemDrop.ItemData, int, int>)RemoveExactStoredItem
                 });
 
-                IsReady = result is bool registered && registered;
+                _ready = result is bool registered && registered;
 
                 if (QIDebugger.Enabled)
                 {
@@ -121,7 +124,7 @@ namespace Quartermaster_Integrations
             }
             finally
             {
-                IsReady = false;
+                _ready = false;
             }
         }
 

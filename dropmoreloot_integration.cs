@@ -24,7 +24,10 @@ namespace Quartermaster_Integrations
     /// </summary>
     public static class DropMoreLootIntegration
     {
-        public static bool IsReady { get; private set; }
+        private static bool _ready;
+
+        /// <summary>False while its switch under 2. Debug is off, so turning it off applies at once.</summary>
+        public static bool IsReady => _ready && BridgePlugin.IntegrationOn(BridgePlugin.EnableDropMoreLoot);
         public static string BindError { get; private set; }
 
         private static ConfigEntry<bool> _enabled;
@@ -121,9 +124,9 @@ namespace Quartermaster_Integrations
                     harmony, stackBody, "Quartermaster.ChestUi.StackBody",
                     postfix: new HarmonyMethod(typeof(DropMoreLootIntegration), nameof(StackBody_Postfix)));
 
-                IsReady = stackPatch && tabPatch;
+                _ready = stackPatch && tabPatch;
 
-                if (IsReady && QIDebugger.Enabled)
+                if (_ready && QIDebugger.Enabled)
                 {
                     QIDebugger.LogDebug(
                         $"[DropMoreLoot] Stack sizes defer to DropMoreLoot (stacking={_enabled.Value}, x{_multiplier.Value}); " +

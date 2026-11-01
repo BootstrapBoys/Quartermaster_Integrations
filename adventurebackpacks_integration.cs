@@ -11,7 +11,10 @@ namespace Quartermaster_Integrations
 {
     public static class AdventureBackpacksIntegration
     {
-        public static bool IsReady { get; private set; }
+        private static bool _ready;
+
+        /// <summary>False while its switch under 2. Debug is off, so turning it off applies at once.</summary>
+        public static bool IsReady => _ready && BridgePlugin.IntegrationOn(BridgePlugin.EnableAdventureBackpacks);
 
         private static Func<bool> _isBackpackOpen;
         private static FieldInfo _currentContainerField;
@@ -56,8 +59,8 @@ namespace Quartermaster_Integrations
 
                 _currentContainerField = AccessTools.Field(typeof(InventoryGui), "m_currentContainer");
 
-                IsReady = abApiType != null;
-                if (!IsReady) return;
+                _ready = abApiType != null;
+                if (!_ready) return;
 
                 ApplyPatches(harmony);
 

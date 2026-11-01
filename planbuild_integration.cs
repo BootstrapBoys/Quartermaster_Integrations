@@ -23,7 +23,10 @@ namespace Quartermaster_Integrations
     /// </summary>
     public static class PlanBuildIntegration
     {
-        public static bool IsReady { get; private set; }
+        private static bool _ready;
+
+        /// <summary>False while its switch under 2. Debug is off, so turning it off applies at once.</summary>
+        public static bool IsReady => _ready && BridgePlugin.IntegrationOn(BridgePlugin.EnablePlanBuild);
 
         private static Type _inventoryInterface;
         private static MethodInfo _proxyFactory;
@@ -72,13 +75,13 @@ namespace Quartermaster_Integrations
                     return;
                 }
 
-                IsReady = HarmonyPatchGuard.TryPatch(
+                _ready = HarmonyPatchGuard.TryPatch(
                     harmony,
                     getInventories,
                     "PlanBuild.Plans.PlanPiece.GetInventories",
                     postfix: new HarmonyMethod(typeof(PlanBuildIntegration), nameof(GetInventories_Postfix)));
 
-                if (IsReady && QIDebugger.Enabled)
+                if (_ready && QIDebugger.Enabled)
                 {
                     QIDebugger.LogDebug("[PlanBuild] Added the Quartermaster storage adapter to plan inventories.");
                 }

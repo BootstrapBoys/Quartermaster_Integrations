@@ -108,6 +108,16 @@ namespace Quartermaster_Integrations
         public static ConfigEntry<bool> DeferToDropMoreLootStacks;
         public static ConfigEntry<bool> ForgetRemovesEntry;
         public static ConfigEntry<bool> IgnoreCrafter;
+        public static ConfigEntry<bool> EnableAAABuildMenu;
+        public static ConfigEntry<bool> EnableAAACrafting;
+        public static ConfigEntry<bool> EnableMyLittleUI;
+        public static ConfigEntry<bool> EnableExtraSlots;
+        public static ConfigEntry<bool> EnableAdventureBackpacks;
+        public static ConfigEntry<bool> EnableEpicLoot;
+        public static ConfigEntry<bool> EnablePlanBuild;
+        public static ConfigEntry<bool> EnableWardIsLove;
+        public static ConfigEntry<bool> EnableWizardry;
+        public static ConfigEntry<bool> EnableDropMoreLoot;
         public static ConfigEntry<Color> SufficientResourceColor;
         public static ConfigEntry<Color> InsufficientFlashBrightColor;
         public static ConfigEntry<Color> InsufficientFlashDarkColor;
@@ -160,6 +170,57 @@ namespace Quartermaster_Integrations
                 "Enabled",
                 true,
                 ConfigOrder.Description("Enable or disable the Quartermaster Integrations mod.", 100));
+
+            EnableAAABuildMenu = Config.Bind(
+                "2. Debug",
+                "EnableAAABuildMenu",
+                true,
+                "AAA Build Menu integration. Turn this off to leave that mod's behaviour alone - its pinned recipe tracker counts Quartermaster storage.");
+            EnableAAACrafting = Config.Bind(
+                "2. Debug",
+                "EnableAAACrafting",
+                true,
+                "AAA Crafting integration. Turn this off to leave that mod's behaviour alone - cluster crafting pulls from Quartermaster storage.");
+            EnableMyLittleUI = Config.Bind(
+                "2. Debug",
+                "EnableMyLittleUI",
+                true,
+                "My Little UI integration. Turn this off to leave that mod's behaviour alone - requirement totals are shown in its tooltip layout.");
+            EnableExtraSlots = Config.Bind(
+                "2. Debug",
+                "EnableExtraSlots",
+                true,
+                "ExtraSlots integration. Turn this off to leave that mod's behaviour alone - its extra rows are counted and protected from the storage adapter.");
+            EnableAdventureBackpacks = Config.Bind(
+                "2. Debug",
+                "EnableAdventureBackpacks",
+                true,
+                "Adventure Backpacks integration. Turn this off to leave that mod's behaviour alone - its backpack is excluded from Quartermaster storage and store-all.");
+            EnableEpicLoot = Config.Bind(
+                "2. Debug",
+                "EnableEpicLoot",
+                true,
+                "Epic Loot integration. Turn this off to leave that mod's behaviour alone - enchanting and sacrifice costs can be paid from storage.");
+            EnablePlanBuild = Config.Bind(
+                "2. Debug",
+                "EnablePlanBuild",
+                true,
+                "PlanBuild integration. Turn this off to leave that mod's behaviour alone - plan costs and hold-to-add use storage.");
+            EnableWardIsLove = Config.Bind(
+                "2. Debug",
+                "EnableWardIsLove",
+                true,
+                "WardIsLove integration. Turn this off to leave that mod's behaviour alone - chests inside a ward you are not permitted on are filtered out.");
+            EnableWizardry = Config.Bind(
+                "2. Debug",
+                "EnableWizardry",
+                true,
+                "Wizardry integration. Turn this off to leave that mod's behaviour alone - its crafting tables reach storage across the table's own range.");
+            EnableDropMoreLoot = Config.Bind(
+                "2. Debug",
+                "EnableDropMoreLoot",
+                true,
+                "DropMoreLoot integration. Turn this off to leave that mod's behaviour alone - its stack multiplier is respected instead of Quartermaster's.");
 
             DebugMode = Config.Bind(
                 "2. Debug",
@@ -307,6 +368,9 @@ namespace Quartermaster_Integrations
         }
 
         public static bool Enabled => ModEnabled == null || ModEnabled.Value;
+
+        /// <summary>True unless the integration's own switch under 2. Debug is off.</summary>
+        public static bool IntegrationOn(ConfigEntry<bool> toggle) => toggle == null || toggle.Value;
 
         private void LogVersionConsistency()
         {

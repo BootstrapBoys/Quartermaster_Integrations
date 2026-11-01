@@ -10,6 +10,8 @@ Every version that gets built is listed here, newest first — including builds 
 
 ### Added
 
+* **Each integration has its own switch under 2. Debug.** Ten toggles - AAA Crafting, AAA Build Menu, My Little UI, ExtraSlots, Adventure Backpacks, Epic Loot, PlanBuild, WardIsLove, Wizardry and DropMoreLoot - all on by default. Turning one off leaves that mod alone immediately, without a restart, which also makes it possible to check whether an integration is needed at all.
+
 * **Forget can remove a chest entry outright.** Quartermaster's Forget button does not forget: it moves the item into the chest's ignore list, so the row stays on screen as "(ignored)" and the chest keeps refusing to store it - which reads as a routing failure. New setting `ForgetRemovesEntry` (default off) makes Forget and Forget All delete the entry from the chest, so the row disappears and putting a sample back teaches the chest from scratch.
 
 * **Materials stack across crafters when enabled.** Quartermaster will not merge a crafted stack with a looted one, so core wood crafted at a bench stays apart from chopped core wood. `IgnoreCrafter` (default off) merges them the way vanilla does, but only when the crafter is the sole difference - quality, variant, world level, durability, cheat flag and custom data must still match, so gear, enchanted items and world-levelled stacks keep Quartermaster's rule.

@@ -23,7 +23,10 @@ namespace Quartermaster_Integrations
     /// </summary>
     public static class WardIsLoveIntegration
     {
-        public static bool IsReady { get; private set; }
+        private static bool _ready;
+
+        /// <summary>False while its switch under 2. Debug is off, so turning it off applies at once.</summary>
+        public static bool IsReady => _ready && BridgePlugin.IntegrationOn(BridgePlugin.EnableWardIsLove);
 
         // CheckAccess( playerID, point, radius, flash ) : bool - true when the player may use the
         // area. flash:false keeps the ward shield from pulsing during a background count.
@@ -96,13 +99,13 @@ namespace Quartermaster_Integrations
                     return;
                 }
 
-                IsReady = HarmonyPatchGuard.TryPatch(
+                _ready = HarmonyPatchGuard.TryPatch(
                     harmony,
                     available,
                     "Quartermaster.InventoryTransfers.AvailableInContainer",
                     prefix: new HarmonyMethod(typeof(WardIsLoveIntegration), nameof(AvailableInContainer_Prefix)));
 
-                if (IsReady && QIDebugger.Enabled)
+                if (_ready && QIDebugger.Enabled)
                 {
                     QIDebugger.LogDebug("[WardIsLove] Ward permissions now filter storage counts and pulls.");
                 }

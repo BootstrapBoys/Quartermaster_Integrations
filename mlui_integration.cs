@@ -8,7 +8,10 @@ namespace Quartermaster_Integrations
 {
     public static class MLUIIntegration
     {
-        public static bool IsReady { get; private set; }
+        private static bool _ready;
+
+        /// <summary>False while its switch under 2. Debug is off, so turning it off applies at once.</summary>
+        public static bool IsReady => _ready && BridgePlugin.IntegrationOn(BridgePlugin.EnableMyLittleUI);
 
         private static FieldInfo _mluiAmountField;
 
@@ -30,10 +33,10 @@ namespace Quartermaster_Integrations
                                        mluiCraftType.GetField("amount", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
                 }
 
-                IsReady = _mluiAmountField != null;
+                _ready = _mluiAmountField != null;
                 if (QIDebugger.Enabled)
                 {
-                    QIDebugger.LogDebug($"MLUIIntegration initialized. Ready: {IsReady}");
+                    QIDebugger.LogDebug($"MLUIIntegration initialized. Ready: {_ready}");
                 }
             }
             catch (Exception ex)

@@ -26,7 +26,10 @@ namespace Quartermaster_Integrations
     /// </summary>
     public static class ExtraSlotsIntegration
     {
-        public static bool IsReady { get; private set; }
+        private static bool _ready;
+
+        /// <summary>False while its switch under 2. Debug is off, so turning it off applies at once.</summary>
+        public static bool IsReady => _ready && BridgePlugin.IntegrationOn(BridgePlugin.EnableExtraSlots);
 
         private static Func<int> _getInventoryHeightPlayer;
         private static Func<Vector2i, bool> _isGridPositionASlot;
@@ -68,8 +71,8 @@ namespace Quartermaster_Integrations
                     _isItemInSlot = (Func<ItemDrop.ItemData, bool>)Delegate.CreateDelegate(typeof(Func<ItemDrop.ItemData, bool>), isItemMethod);
                 }
 
-                IsReady = _getInventoryHeightPlayer != null;
-                if (!IsReady) return;
+                _ready = _getInventoryHeightPlayer != null;
+                if (!_ready) return;
 
                 ApplyQuartermasterPatches(harmony);
 

@@ -11,7 +11,10 @@ namespace Quartermaster_Integrations
 {
     public static class AAACraftingIntegration
     {
-        public static bool IsReady { get; private set; }
+        private static bool _ready;
+
+        /// <summary>False while its switch under 2. Debug is off, so turning it off applies at once.</summary>
+        public static bool IsReady => _ready && BridgePlugin.IntegrationOn(BridgePlugin.EnableAAACrafting);
 
         private static FieldInfo _cfcLoadedField;
         private static FieldInfo _maxCraftInventoryChangedField;
@@ -70,8 +73,8 @@ namespace Quartermaster_Integrations
                     }
                 }
 
-                IsReady = utilitiesType != null && aaaCraftType != null;
-                if (!IsReady)
+                _ready = utilitiesType != null && aaaCraftType != null;
+                if (!_ready)
                 {
                     if (QIDebugger.Enabled)
                     {

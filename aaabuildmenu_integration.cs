@@ -17,7 +17,10 @@ namespace Quartermaster_Integrations
     /// </summary>
     public static class AAABuildMenuIntegration
     {
-        public static bool IsReady { get; private set; }
+        private static bool _ready;
+
+        /// <summary>False while its switch under 2. Debug is off, so turning it off applies at once.</summary>
+        public static bool IsReady => _ready && BridgePlugin.IntegrationOn(BridgePlugin.EnableAAABuildMenu);
 
         // Last logged total per item, so the debug log records changes rather than every refresh.
         private static readonly Dictionary<string, int> LastLoggedTotal = new Dictionary<string, int>(StringComparer.Ordinal);
@@ -53,7 +56,7 @@ namespace Quartermaster_Integrations
                     return;
                 }
 
-                IsReady = HarmonyPatchGuard.TryPatch(
+                _ready = HarmonyPatchGuard.TryPatch(
                     harmony,
                     countItem,
                     "AAABuildMenu.PinnedRecipeTracker.CountItem",

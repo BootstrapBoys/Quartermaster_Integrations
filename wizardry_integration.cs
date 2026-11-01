@@ -27,7 +27,10 @@ namespace Quartermaster_Integrations
     /// </summary>
     public static class WizardryIntegration
     {
-        public static bool IsReady { get; private set; }
+        private static bool _ready;
+
+        /// <summary>False while its switch under 2. Debug is off, so turning it off applies at once.</summary>
+        public static bool IsReady => _ready && BridgePlugin.IntegrationOn(BridgePlugin.EnableWizardry);
         public static string BindError { get; private set; }
 
         /// <summary>Every Wizardry crafting station prefab name ends with this.</summary>
@@ -116,9 +119,9 @@ namespace Quartermaster_Integrations
                         priority = (int)Priority.LowerThanNormal
                     });
 
-                IsReady = counted && validated;
+                _ready = counted && validated;
 
-                if (IsReady && QIDebugger.Enabled)
+                if (_ready && QIDebugger.Enabled)
                 {
                     QIDebugger.LogDebug("[Wizardry] Base-range storage enabled at Wizardry crafting tables.");
                 }
