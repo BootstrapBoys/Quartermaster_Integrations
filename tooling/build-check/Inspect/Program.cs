@@ -155,6 +155,14 @@ internal static class Program
         Method(qm, "Quartermaster.CraftStorageAccess", "Nearby", new[] { "Player" }, "IEnumerable`1", true);
         Method(qm, "Quartermaster.CraftStorageAccess", "CanSupply", new[] { "Container" }, "Boolean", true);
         Method(qm, "Quartermaster.InventoryTransfers", "Stackable", new[] { "ItemData", "ItemData" }, "Boolean", true);
+        Method(qm, "Quartermaster.Automation", "Destinations",
+            new[] { "BaseNetwork", "ItemData", "Vector3", "Container", "Boolean" }, "List`1", true);
+        Method(qm, "Quartermaster.Automation", "ExplainUnsorted",
+            new[] { "BaseNetwork", "Container", "ItemData" }, "String", true);
+        Method(qm, "Quartermaster.Automation", "Writable",
+            new[] { "Container", "ItemData", "String" }, "Boolean", true);
+        Method(qm, "Quartermaster.FurnitureAssignment", "Accepts",
+            new[] { "Container", "ItemData" }, "Boolean", true);
         Method(qm, "Quartermaster.SharedCrafting", "SourcesValid", new[] { "Player", "Container[]" }, "Boolean", true);
         Field(qm, "Quartermaster.ContainerRegistry", "All", "List`1", true);
         Method(qm, "Quartermaster.ContainerRegistry", "GetSettings", new[] { "Container" }, "ChestSettings", true);

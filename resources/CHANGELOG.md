@@ -6,6 +6,12 @@ Every version that gets built is listed here, newest first — including builds 
 
 ---
 
+## [2.7.3] - 2026-11-01
+
+Internal only: diagnostics for "No destination" routing. No functional or display changes.
+
+---
+
 ## [2.7.2] - 2026-11-01
 
 Internal only: diagnostics for refused stack merges. No functional or display changes.
