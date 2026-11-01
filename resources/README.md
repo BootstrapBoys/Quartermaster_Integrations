@@ -31,7 +31,7 @@ Puts Quartermaster's nearby storage into the crafting window: how much of each i
 | **PlanBuild** (`marcopogo.PlanBuild`) | No — 0.20.0+ | Plan pieces can be placed from storage, including "hold to add materials" |
 | **WardIsLove** (`Azumatt.WardIsLove`) | No — 4.0.9+ | Chests inside a ward you are not permitted on are excluded from counts and never pulled from; a Deposit Chest inside a ward runs its whole base on that bubble (`WardHostRange`) |
 | **Wizardry** (`Therzie.Wizardry`) | No — 1.2.3+ | Its wizard table, arcane forge, weaving loom and potion cauldron reach base storage across the table's `BaseRange` |
-| **DropMoreLoot** (`TastyChickenLegs.DropMoreLoot`) | No — 1.2.9+ | Its stack multiplier is respected; Quartermaster's stack override steps aside (`DeferToDropMoreLootStacks`) |
+| **DropMoreLoot** (`TastyChickenLegs.DropMoreLoot`) | No — 1.2.9+ | Its stack multiplier is respected; Quartermaster's stack override steps aside (`DeferToDropMoreLootStacks`) and the ledger's stack-size toggle is disabled and labelled with DropMoreLoot's multiplier |
 
 Every optional integration is reflection-bound at startup and reports what it found. Missing one costs you that specific convenience, never the mod itself.
 
@@ -73,7 +73,7 @@ Generated at `BepInEx/config/com.bootstrapboys.quartermaster_integrations.cfg` o
 | `1. General` | `Enabled` | `true` | Turn the mod's UI changes off without uninstalling. |
 | `3. Visuals` | `RequirementDisplayMode` | `CombinedTotal` | How the available count is written (see below). |
 | `4. Patches` | `DeferToOtherFormatting` | `false` | If AAA Crafting or AdventureBackpacks has already formatted a row, leave its text alone. Only enable this if you prefer their style. My Little UI's own "available resources amount" counts your pockets only, so deferring to it drops chest totals. |
-| `4. Patches` | `DeferToDropMoreLootStacks` | `true` | **DropMoreLoot only.** When its stacking is enabled, its multiplier wins and Quartermaster stops applying `MaximumStackSize`; the ledger's stack tab says so. Turn off to keep Quartermaster's stack size. |
+| `4. Patches` | `DeferToDropMoreLootStacks` | `true` | **DropMoreLoot only.** When its stacking is enabled, its multiplier wins and Quartermaster stops applying `MaximumStackSize`. The ledger's "Use custom stack sizes" toggle is then disabled and reads *Stack sizes are managed by DropMoreLoot (xN)*, with the maximum field and Save button disabled too. Turn off to keep Quartermaster's stack size. |
 | `4. Patches` | `WardHostRange` | `true` | **WardIsLove only.** A Deposit Chest inside a ward runs its base on that ward's bubble instead of `BaseRange`, so its base/network range ends at the bubble edge. While you are inside a ward, only chests in that same bubble count for crafting. **Outside every ward, crafting is Quartermaster's `CraftRange` as normal** — a warded chest is still reachable if it falls within that range. |
 | `4. Patches` | `ForgetRemovesEntry` | `false` | **Quartermaster only.** Its Forget button does not delete a chest entry — it moves the item to the chest's ignore list, where it keeps showing as "(ignored)" and keeps refusing storage. With this on, Forget and Forget All remove the entry outright: the row disappears and putting a sample back teaches the chest again. |
 | `4. Patches` | `IgnoreCrafter` | `false` | **Quartermaster only.** It will not merge two stacks whose crafter differs, so core wood crafted at a bench sits apart from core wood you picked up (vanilla ignores the crafter). With this on, materials merge when the crafter is the only difference — same item, quality, variant, world level, durability, cheat flag and custom data. Gear, enchanted and world-levelled items keep Quartermaster's rule. |
@@ -119,6 +119,7 @@ Set `DebugMode = true` under `2. Debug` and the mod writes `BepInEx/BSBLogs/Quar
 | `[WardHostRange] inside N ward bubble(s), radius …` / `outside every ward` | entry/exit of a WardIsLove ward, checked twice a second (debug only) |
 | `[Wizardry] '<table>': N container(s) reachable` | a Wizardry table counted storage across CraftRange plus its own BaseRange (one line per 10 s) |
 | `[DropMoreLoot] Stack sizes defer to DropMoreLoot …` | startup line naming the multiplier in charge and the toggle state |
+| `[DropMoreLoot] Ledger stack tab: N control(s) disabled, toggle now reads …` | the stack tab was adjusted for the deferral (debug only) |
 
 ---
 

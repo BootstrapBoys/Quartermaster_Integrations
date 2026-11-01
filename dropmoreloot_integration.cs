@@ -1,10 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using HarmonyLib;
+using UnityEngine;
 
 namespace Quartermaster_Integrations
 {
@@ -17,7 +17,8 @@ namespace Quartermaster_Integrations
     ///
     /// With `DeferToDropMoreLootStacks` on (default) and DropMoreLoot's own stacking enabled,
     /// Quartermaster is told its stack override is off, so DropMoreLoot's multiplied value stands.
-    /// Quartermaster's stack tab then says so, rather than showing a number that is not being applied.
+    /// The ledger's stack tab then disables its "Use custom stack sizes" toggle and names DropMoreLoot
+    /// on the button itself, so the tab cannot claim a maximum that is not being applied.
     ///
     /// This is display/config only: no item, recipe or inventory amounts are touched here.
     /// </summary>
@@ -28,8 +29,11 @@ namespace Quartermaster_Integrations
 
         private static ConfigEntry<bool> _enabled;
         private static ConfigEntry<int> _multiplier;
-        private static FieldInfo _tabField;
-        private static FieldInfo _stackPendingField;
+        private static FieldInfo _bodyField;
+
+        private const string CustomToggle = "Use custom stack sizes";
+        private const string NormalToggle = "Use normal stack sizes";
+        private const string SaveButton = "Save stack sizes";
 
         /// <summary>True when DropMoreLoot is present, stacking is on, and the toggle says defer.</summary>
         public static bool Active
@@ -91,19 +95,19 @@ namespace Quartermaster_Integrations
                     ? null
                     : AccessTools.Method(itemStacks, "Configure", new[] { typeof(bool), typeof(int) });
 
-                MethodInfo status = chestUi == null
+                MethodInfo stackBody = chestUi == null
                     ? null
-                    : AccessTools.Method(chestUi, "StatusText", Type.EmptyTypes);
+                    : AccessTools.Method(chestUi, "StackBody", Type.EmptyTypes);
 
-                _tabField = chestUi?.GetField("tab", BindingFlags.Static | BindingFlags.NonPublic);
-                _stackPendingField = chestUi?.GetField("stackPending", BindingFlags.Static | BindingFlags.NonPublic);
+                _bodyField = chestUi?.GetField("body", BindingFlags.Static | BindingFlags.NonPublic);
 
-                if (_enabled == null || _multiplier == null || configure == null || status == null ||
-                    _tabField == null)
+                if (_enabled == null || _multiplier == null || configure == null || stackBody == null ||
+                    _bodyField == null)
                 {
                     BindError =
                         $"enableStacking={_enabled != null}, itemStackMultiplier={_multiplier != null}, " +
-                        $"ItemStacks.Configure={configure != null}, ChestUi.StatusText={status != null}, tab={_tabField != null}";
+                        $"ItemStacks.Configure={configure != null}, ChestUi.StackBody={stackBody != null}, " +
+                        $"body={_bodyField != null}";
 
                     QIDebugger.LogError("[DropMoreLoot] Bindings incomplete: " + BindError);
                     return;
@@ -113,11 +117,11 @@ namespace Quartermaster_Integrations
                     harmony, configure, "Quartermaster.ItemStacks.Configure",
                     prefix: new HarmonyMethod(typeof(DropMoreLootIntegration), nameof(Configure_Prefix)));
 
-                bool textPatch = HarmonyPatchGuard.TryPatch(
-                    harmony, status, "Quartermaster.ChestUi.StatusText",
-                    postfix: new HarmonyMethod(typeof(DropMoreLootIntegration), nameof(StatusText_Postfix)));
+                bool tabPatch = HarmonyPatchGuard.TryPatch(
+                    harmony, stackBody, "Quartermaster.ChestUi.StackBody",
+                    postfix: new HarmonyMethod(typeof(DropMoreLootIntegration), nameof(StackBody_Postfix)));
 
-                IsReady = stackPatch && textPatch;
+                IsReady = stackPatch && tabPatch;
 
                 if (IsReady && QIDebugger.Enabled)
                 {
@@ -142,23 +146,102 @@ namespace Quartermaster_Integrations
         }
 
         /// <summary>
-        /// The ledger's stack tab shows Quartermaster's MaximumStackSize, which is not being applied
-        /// while deferring. Say who is in charge instead of showing a number that does nothing.
+        /// Runs after the ledger builds its stack tab: disables the custom/normal stack toggle, puts
+        /// DropMoreLoot's name on it, and disables the maximum field and Save button, which would
+        /// otherwise appear to change a setting Quartermaster is not applying. Component access is by
+        /// reflection so this needs neither a TextMeshPro nor a UnityEngine.UI reference.
         /// </summary>
-        public static void StatusText_Postfix(ref string __result)
+        public static void StackBody_Postfix()
         {
             if (!Active) return;
 
             try
             {
-                if (_tabField.GetValue(null) is int tab && tab != 1) return;
-                if (_stackPendingField != null && _stackPendingField.GetValue(null) is bool pending && pending) return;
+                if (!(_bodyField.GetValue(null) is Transform body) || body == null) return;
 
-                __result = $"Stack sizes are managed by DropMoreLoot (x{Multiplier}); Quartermaster's stack override is off.";
+                string notice = $"Stack sizes are managed by DropMoreLoot (x{Multiplier})";
+                int changed = 0;
+
+                foreach (Component component in body.GetComponentsInChildren<Component>(true))
+                {
+                    if (component == null) continue;
+
+                    Type type = component.GetType();
+
+                    if (type.Name.IndexOf("InputField", StringComparison.Ordinal) >= 0)
+                    {
+                        if (SetInteractable(component, false)) changed++;
+                        continue;
+                    }
+
+                    PropertyInfo textProperty = type.GetProperty("text", BindingFlags.Instance | BindingFlags.Public);
+                    if (textProperty == null || textProperty.PropertyType != typeof(string)) continue;
+
+                    string label = textProperty.GetValue(component, null) as string;
+                    if (label == null) continue;
+
+                    bool toggle = label == CustomToggle || label == NormalToggle;
+                    if (!toggle && label != SaveButton) continue;
+
+                    if (toggle)
+                    {
+                        try
+                        {
+                            textProperty.SetValue(component, notice, null);
+                        }
+                        catch
+                        {
+                            // Cosmetic only; still disable the control below.
+                        }
+                    }
+
+                    for (Transform parent = component.transform; parent != null; parent = parent.parent)
+                    {
+                        if (SetInteractable(parent.gameObject, false)) break;
+                        if (parent == body) break;
+                    }
+
+                    changed++;
+                }
+
+                if (changed > 0 && QIDebugger.Enabled)
+                {
+                    QIDebugger.LogDebug(
+                        $"[DropMoreLoot] Ledger stack tab: {changed} control(s) disabled, toggle now reads '{notice}'.");
+                }
             }
             catch (Exception ex)
             {
-                QIDebugger.LogDebug("[DropMoreLoot] Could not write the stack-screen notice", ex);
+                QIDebugger.LogDebug("[DropMoreLoot] Could not adjust the ledger stack tab", ex);
+            }
+        }
+
+        private static bool SetInteractable(GameObject target, bool value)
+        {
+            foreach (Component component in target.GetComponents<Component>())
+            {
+                if (SetInteractable(component, value)) return true;
+            }
+
+            return false;
+        }
+
+        private static bool SetInteractable(Component component, bool value)
+        {
+            PropertyInfo interactable = component == null
+                ? null
+                : component.GetType().GetProperty("interactable", BindingFlags.Instance | BindingFlags.Public);
+
+            if (interactable == null || interactable.PropertyType != typeof(bool) || !interactable.CanWrite) return false;
+
+            try
+            {
+                interactable.SetValue(component, value, null);
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
     }

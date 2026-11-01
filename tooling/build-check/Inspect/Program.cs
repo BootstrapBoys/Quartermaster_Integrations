@@ -133,8 +133,8 @@ internal static class Program
         Field(dml, "DropMoreLoot.DropMoreLootMain", "enableStacking", "ConfigEntry`1", true);
         Field(dml, "DropMoreLoot.DropMoreLootMain", "itemStackMultiplier", "ConfigEntry`1", true);
         Method(qm, "Quartermaster.ItemStacks", "Configure", new[] { "Boolean", "Int32" }, "Void", true);
-        Method(qm, "Quartermaster.ChestUi", "StatusText", new string[0], "String", true);
-        Field(qm, "Quartermaster.ChestUi", "tab", "Int32", true);
+        Method(qm, "Quartermaster.ChestUi", "StackBody", new string[0], "Void", true);
+        Field(qm, "Quartermaster.ChestUi", "body", "RectTransform", true);
 
         // ---- Wizardry crafting tables ----------------------------------------------------------
         var wiz = Load(mlc, Path.Combine(Candidates, "Wizardry.dll"));
