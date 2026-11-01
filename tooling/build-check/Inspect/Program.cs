@@ -163,6 +163,13 @@ internal static class Program
             new[] { "Container", "ItemData", "String" }, "Boolean", true);
         Method(qm, "Quartermaster.FurnitureAssignment", "Accepts",
             new[] { "Container", "ItemData" }, "Boolean", true);
+        Method(qm, "Quartermaster.InventoryTransfers", "ItemId", new[] { "ItemData" }, "String", true);
+        Field(qm, "Quartermaster.ChestSettings", "Remembered", "List`1", false);
+        Field(qm, "Quartermaster.ChestSettings", "Forgotten", "List`1", false);
+        Field(qm, "Quartermaster.ChestSettings", "AcceptStorage", "Boolean", false);
+        Field(qm, "Quartermaster.ChestSettings", "Deposit", "Boolean", false);
+        Field(qm, "Quartermaster.ChestSettings", "Overflow", "Boolean", false);
+        Field(qm, "Quartermaster.ChestSettings", "AutoAssign", "Boolean", false);
         Method(qm, "Quartermaster.SharedCrafting", "SourcesValid", new[] { "Player", "Container[]" }, "Boolean", true);
         Field(qm, "Quartermaster.ContainerRegistry", "All", "List`1", true);
         Method(qm, "Quartermaster.ContainerRegistry", "GetSettings", new[] { "Container" }, "ChestSettings", true);

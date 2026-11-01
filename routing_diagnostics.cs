@@ -27,6 +27,15 @@ namespace Quartermaster_Integrations
         private static Func<Container, ItemDrop.ItemData, bool> _accepts;
         private static Func<object, Vector3, Vector3, bool> _canTransfer;
         private static FieldInfo _chestsField;
+        private static List<Container> _allContainers;
+        private static MethodInfo _getSettings;
+        private static MethodInfo _itemId;
+        private static FieldInfo _remembered;
+        private static FieldInfo _forgotten;
+        private static FieldInfo _acceptStorage;
+        private static FieldInfo _deposit;
+        private static FieldInfo _overflow;
+        private static FieldInfo _autoAssign;
 
         private static readonly Dictionary<string, float> LastLogged = new Dictionary<string, float>();
         private const float Throttle = 10f;
@@ -66,6 +75,25 @@ namespace Quartermaster_Integrations
                     : AccessTools.Method(automation, "ExplainUnsorted", new[] { baseNetwork, typeof(Container), typeof(ItemDrop.ItemData) });
 
                 _chestsField = baseNetwork?.GetField("Chests", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+                Type registry = qm?.GetType("Quartermaster.ContainerRegistry");
+                Type transfersType = qm?.GetType("Quartermaster.InventoryTransfers");
+
+                _allContainers = AccessTools.Field(registry, "All")?.GetValue(null) as List<Container>;
+                _getSettings = AccessTools.Method(registry, "GetSettings", new[] { typeof(Container) });
+                _itemId = AccessTools.Method(transfersType, "ItemId", new[] { typeof(ItemDrop.ItemData) });
+
+                Type settingsType = _getSettings?.ReturnType;
+                if (settingsType != null)
+                {
+                    const BindingFlags F = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+                    _remembered = settingsType.GetField("Remembered", F);
+                    _forgotten = settingsType.GetField("Forgotten", F);
+                    _acceptStorage = settingsType.GetField("AcceptStorage", F);
+                    _deposit = settingsType.GetField("Deposit", F);
+                    _overflow = settingsType.GetField("Overflow", F);
+                    _autoAssign = settingsType.GetField("AutoAssign", F);
+                }
 
                 if (destinations == null || writable == null || accepts == null || canTransfer == null || _chestsField == null)
                 {
@@ -146,6 +174,8 @@ namespace Quartermaster_Integrations
                 foreach (string line in samples) QIDebugger.LogDebug("[Routing]   " + line);
                 foreach (string line in blocked) QIDebugger.LogDebug("[Routing]   full/busy -> " + line);
 
+                ReportAssignments(__0, __1);
+
                 string explain = _explainUnsorted?.Invoke(null, new object[] { __0, __3, __1 }) as string;
                 if (!string.IsNullOrEmpty(explain)) QIDebugger.LogDebug("[Routing]   quartermaster: " + explain);
             }
@@ -153,6 +183,55 @@ namespace Quartermaster_Integrations
             {
                 QIDebugger.LogDebug("[Routing] Could not describe the failed route", ex);
             }
+        }
+
+        /// <summary>
+        /// Finds every chest in the world that has this item remembered, and says whether the network
+        /// sees it. An assignment on a chest outside the network - or on a chest with AcceptStorage
+        /// off, Deposit on, or the item in Forgotten - explains "no destination" with the assignment
+        /// apparently present.
+        /// </summary>
+        private static void ReportAssignments(object network, ItemDrop.ItemData item)
+        {
+            if (_allContainers == null || _getSettings == null || _itemId == null || _remembered == null) return;
+
+            string id = _itemId.Invoke(null, new object[] { item }) as string;
+            if (string.IsNullOrEmpty(id)) return;
+
+            System.Collections.IList networkChests = _chestsField.GetValue(network) as System.Collections.IList;
+
+            int found = 0;
+            foreach (Container chest in _allContainers)
+            {
+                if (chest == null) continue;
+
+                object settings = _getSettings.Invoke(null, new object[] { chest });
+                if (!(Remembered(settings).Contains(id))) continue;
+
+                found++;
+                bool inNetwork = networkChests != null && networkChests.Contains(chest);
+
+                QIDebugger.LogDebug(
+                    $"[Routing]   assigned on '{chest.m_name}': inNetwork={inNetwork}, " +
+                    $"acceptStorage={Flag(_acceptStorage, settings)}, deposit={Flag(_deposit, settings)}, " +
+                    $"overflow={Flag(_overflow, settings)}, autoAssign={Flag(_autoAssign, settings)}, " +
+                    $"forgotten={Remembered(settings, _forgotten).Contains(id)}");
+            }
+
+            if (found == 0)
+            {
+                QIDebugger.LogDebug("[Routing]   no chest in the world remembers this item id");
+            }
+        }
+
+        private static List<string> Remembered(object settings, FieldInfo field = null)
+        {
+            return (field ?? _remembered)?.GetValue(settings) as List<string> ?? new List<string>();
+        }
+
+        private static string Flag(FieldInfo field, object settings)
+        {
+            return field == null ? "?" : field.GetValue(settings)?.ToString() ?? "?";
         }
     }
 }
