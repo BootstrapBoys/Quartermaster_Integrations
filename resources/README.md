@@ -71,7 +71,7 @@ Generated at `BepInEx/config/com.bootstrapboys.quartermaster_integrations.cfg` o
 | Section | Key | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `1. General` | `Enabled` | `true` | Turn the mod's UI changes off without uninstalling. |
-| `1. General` | `RequirementDisplayMode` | `CombinedTotal` | How the available count is written (see below). |
+| `3. Visuals` | `RequirementDisplayMode` | `CombinedTotal` | How the available count is written (see below). |
 | `4. Patches` | `DeferToOtherFormatting` | `false` | If AAA Crafting or AdventureBackpacks has already formatted a row, leave its text alone. Only enable this if you prefer their style. My Little UI's own "available resources amount" counts your pockets only, so deferring to it drops chest totals. |
 | `4. Patches` | `DeferToDropMoreLootStacks` | `true` | **DropMoreLoot only.** When its stacking is enabled, its multiplier wins and Quartermaster stops applying `MaximumStackSize`; the ledger's stack tab says so. Turn off to keep Quartermaster's stack size. |
 | `4. Patches` | `WardHostRange` | `true` | **WardIsLove only.** A Deposit Chest inside a ward runs its base on that ward's bubble instead of `BaseRange`, so its base/network range ends at the bubble edge. While you are inside a ward, only chests in that same bubble count for crafting. **Outside every ward, crafting is Quartermaster's `CraftRange` as normal** — a warded chest is still reachable if it falls within that range. |
