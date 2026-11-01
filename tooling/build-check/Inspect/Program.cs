@@ -129,6 +129,14 @@ internal static class Program
         Method(wil, "WardIsLove.Util.CustomCheck", "CheckAccess", new[] { "Int64", "Vector3", "Single", "Boolean" }, "Boolean", true);
 
         // ---- WardIsLove host range: every Quartermaster/WIL member the filter relies on ----------
+        Method(qm, "Quartermaster.BaseNetwork", "Contains", new[] { "Vector3" }, "Boolean", false);
+        Method(qm, "Quartermaster.BaseNetwork", "CanTransfer", new[] { "Vector3", "Vector3" }, "Boolean", false);
+        Field(qm, "Quartermaster.BaseNetwork", "Hubs", "List`1", false);
+        Field(qm, "Quartermaster.BaseNetwork", "Chests", "List`1", false);
+        Field(qm, "Quartermaster.BaseNetwork", "Machines", "List`1", false);
+        Method(qm, "Quartermaster.Automation", "Network", new[] { "Component", "String" }, "BaseNetwork", true);
+        Method(qm, "Quartermaster.Automation", "RebuildNetworks", new string[0], "Void", true);
+        Field(qm, "Quartermaster.Automation", "networks", "List`1", true);
         Method(qm, "Quartermaster.CraftStorageAccess", "Nearby", new[] { "Player" }, "IEnumerable`1", true);
         Method(qm, "Quartermaster.CraftStorageAccess", "CanSupply", new[] { "Container" }, "Boolean", true);
         Method(qm, "Quartermaster.SharedCrafting", "SourcesValid", new[] { "Player", "Container[]" }, "Boolean", true);

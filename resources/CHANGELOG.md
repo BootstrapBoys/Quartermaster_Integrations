@@ -10,11 +10,12 @@ Every version that gets built is listed here, newest first — including builds 
 
 ### Added
 
-* **WardIsLove shared range** (`1. General > WardHostRange`, default on). While you are standing inside a WardIsLove ward, that ward's bubble is the storage range: a chest anywhere inside the same ward counts from anywhere inside it, with no distance test. Chests outside every ward you are standing in keep Quartermaster's CraftRange, and standing outside all wards restores normal behaviour completely.
-  * Membership is by region, not radius, so a chest at the far side of a large ward counts even though it is further away than that ward's radius.
-  * Ward permissions still decide: a chest inside the ward that you are not permitted on is neither counted nor pulled from.
-  * Applied at both of Quartermaster's range decisions - the source list and the pre-pull validation - so the window's counts, the max-craft number and what a craft actually takes agree.
-  * Only wards WardIsLove hosts are affected; a plain vanilla ward keeps Quartermaster's range.
+* **WardIsLove hosts the range for bases inside it** (`1. General > WardHostRange`, default on). Three rules, all measured by the ward bubble rather than by a radius:
+  * A **Deposit Chest inside a ward** runs its network on that ward's bubble: the bubble replaces `BaseRange`, so the base covers exactly the warded area and the deposit chest drops out of range the moment you step outside it, however close you are.
+  * **While you are inside a ward**, only chests inside that same bubble count for crafting - `CraftRange` no longer reaches past the bubble.
+  * **A Deposit Chest outside every ward** keeps Quartermaster's `BaseRange` and `CraftRange` exactly as configured.
+  * Two deposit chests sharing a ward are merged into a single network, regardless of their spacing.
+  * Ward permissions still decide, and chests with Crafting Supply off are still ignored.
 
 ---
 
