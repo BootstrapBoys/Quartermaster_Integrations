@@ -134,7 +134,6 @@ internal static class Program
         Field(qm, "Quartermaster.BaseNetwork", "Hubs", "List`1", false);
         Field(qm, "Quartermaster.BaseNetwork", "Chests", "List`1", false);
         Field(qm, "Quartermaster.BaseNetwork", "Machines", "List`1", false);
-        Method(qm, "Quartermaster.Automation", "Network", new[] { "Component", "String" }, "BaseNetwork", true);
         Method(qm, "Quartermaster.Automation", "RebuildNetworks", new string[0], "Void", true);
         Field(qm, "Quartermaster.Automation", "networks", "List`1", true);
         Method(qm, "Quartermaster.CraftStorageAccess", "Nearby", new[] { "Player" }, "IEnumerable`1", true);

@@ -71,7 +71,7 @@ Generated at `BepInEx/config/com.bootstrapboys.quartermaster_integrations.cfg` o
 | `1. General` | `Enabled` | `true` | Turn the mod's UI changes off without uninstalling. |
 | `1. General` | `RequirementDisplayMode` | `CombinedTotal` | How the available count is written (see below). |
 | `1. General` | `DeferToOtherFormatting` | `false` | If AAA Crafting or AdventureBackpacks has already formatted a row, leave its text alone. Only enable this if you prefer their style. My Little UI's own "available resources amount" counts your pockets only, so deferring to it drops chest totals. |
-| `1. General` | `WardHostRange` | `true` | **WardIsLove only.** A Deposit Chest inside a ward runs its base on that ward's bubble instead of `BaseRange`, so it goes out of range the moment you leave the bubble. While you are inside a ward, only chests in that same bubble count for crafting; `CraftRange` does not reach past it. Deposit chests outside every ward keep Quartermaster's settings. |
+| `1. General` | `WardHostRange` | `true` | **WardIsLove only.** A Deposit Chest inside a ward runs its base on that ward's bubble instead of `BaseRange`, so its base/network range ends at the bubble edge. While you are inside a ward, only chests in that same bubble count for crafting. **Outside every ward, crafting is Quartermaster's `CraftRange` as normal** — a warded chest is still reachable if it falls within that range. |
 | `2. Visuals` | `SufficientColor` | `(0.68, 0.91, 0.90, 1.00)` | Color of the available count when you have enough. |
 | `2. Visuals` | `InsufficientFlashBrightColor` | `(1.00, 0.22, 0.22, 1.00)` | Bright end of the insufficient-material flash. |
 | `2. Visuals` | `InsufficientFlashDarkColor` | `(0.45, 0.02, 0.02, 1.00)` | Dark end of the insufficient-material flash. |
@@ -139,6 +139,6 @@ All three are enforced by Quartermaster, not by this mod, so the display follows
 
 **PlanBuild or WardIsLove not taking effect?** Both need `QM storages: True` in the load line plus their own flag in `[Integrations]`. WardIsLove only ever removes containers: a chest outside every ward is never affected, and inside a ward where you are permitted nothing changes.
 
-**`WardHostRange` and a chest that won't count?** Inside a ward, only chests inside that same bubble count, the chest needs Crafting Supply on, must not be in use, and must be one you are permitted on. A base whose deposit chest is in a ward is only reachable from inside that bubble - standing beside the deposit chest outside the bubble is deliberately out of range. Bases outside every ward follow `BaseRange`/`CraftRange` as usual.
+**`WardHostRange` and a chest that won't count?** Inside a ward, only chests inside that same bubble count, the chest needs Crafting Supply on, must not be in use, and must be one you are permitted on. Outside every ward, crafting follows `CraftRange` exactly as before, including for chests that sit inside a ward — the bubble only bounds the base's own network range.
 
 **Something else?** Set `DebugMode = true`, reproduce the issue, and include both `BepInEx/BSBLogs/QuarterMaster_Integrations.log` and `BepInEx/LogOutput.log` in your bug report.

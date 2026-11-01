@@ -48,7 +48,6 @@ namespace Quartermaster_Integrations
         private static MethodInfo _getWardRadius;
 
         private static Type _baseNetworkType;
-        private static MethodInfo _networkFor;
         private static MethodInfo _rebuildNetworks;
         private static FieldInfo _hubsField;
         private static FieldInfo _chestsField;
@@ -124,7 +123,7 @@ namespace Quartermaster_Integrations
                 if (_craftRange == null || _allContainers == null || canSupply == null || supplyField == null ||
                     _allAreas == null || _wardType == null || _getWardRadius == null ||
                     nearby == null || sourcesValid == null ||
-                    contains == null || canTransfer == null || _networkFor == null || _networksField == null)
+                    contains == null || canTransfer == null || _networksField == null)
                 {
                     BindError =
                         $"CraftRange={_craftRange != null}, ContainerRegistry.All={_allContainers != null}, " +
@@ -132,7 +131,7 @@ namespace Quartermaster_Integrations
                         $"m_allAreas={_allAreas != null}, WardMonoscript={_wardType != null}, " +
                         $"GetWardRadius={_getWardRadius != null}, Nearby={nearby != null}, " +
                         $"SourcesValid={sourcesValid != null}, Contains={contains != null}, " +
-                        $"CanTransfer={canTransfer != null}, Network={_networkFor != null}, " +
+                        $"CanTransfer={canTransfer != null}, " +
                         $"Networks={_networksField != null}";
 
                     QIDebugger.LogError("[WardHostRange] Bindings incomplete: " + BindError);
@@ -211,16 +210,6 @@ namespace Quartermaster_Integrations
                     _hubsField = type.GetField("Hubs", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
                     _chestsField = type.GetField("Chests", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
                     _machinesField = type.GetField("Machines", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                }
-
-                if (_networkFor == null)
-                {
-                    _networkFor = type.GetMethod(
-                        "Network",
-                        BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic,
-                        null,
-                        new[] { typeof(Component), typeof(string) },
-                        null);
                 }
 
                 if (_rebuildNetworks == null)
@@ -421,18 +410,10 @@ namespace Quartermaster_Integrations
                 return false;
             }
 
-            if ((position - player.transform.position).sqrMagnitude > CraftRangeSquared()) return false;
-
-            // A base hosted in a ward can only be used from inside that ward.
-            return !InWardedBase(container);
-        }
-
-        private static bool InWardedBase(Container container)
-        {
-            if (_networkFor == null) return false;
-
-            object network = _networkFor.Invoke(null, new object[] { container, null });
-            return network != null && WardOfNetwork(network) >= 0;
+            // Outside every bubble, crafting is plain Quartermaster: CraftRange from the player, with
+            // no ward involvement at all. A chest inside a ward is reachable from outside if it is
+            // within CraftRange - only the base's own network range is bubble-bound.
+            return (position - player.transform.position).sqrMagnitude <= CraftRangeSquared();
         }
 
         // ---- ward geometry -----------------------------------------------------------------------

@@ -13,6 +13,7 @@ Every version that gets built is listed here, newest first — including builds 
 * **WardIsLove hosts the range for bases inside it** (`1. General > WardHostRange`, default on). Three rules, all measured by the ward bubble rather than by a radius:
   * A **Deposit Chest inside a ward** runs its network on that ward's bubble: the bubble replaces `BaseRange`, so the base covers exactly the warded area and the deposit chest drops out of range the moment you step outside it, however close you are.
   * **While you are inside a ward**, only chests inside that same bubble count for crafting - `CraftRange` no longer reaches past the bubble.
+  * **Outside every ward**, crafting is Quartermaster's `CraftRange` unchanged - a chest inside a ward is still reachable from outside if it falls within that range. Only the base's own network range is bubble-bound.
   * **A Deposit Chest outside every ward** keeps Quartermaster's `BaseRange` and `CraftRange` exactly as configured.
   * Two deposit chests sharing a ward are merged into a single network, regardless of their spacing.
   * Ward permissions still decide, and chests with Crafting Supply off are still ignored.
