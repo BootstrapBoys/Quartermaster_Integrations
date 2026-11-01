@@ -36,6 +36,7 @@
     <Compile Include="../../wizardry_integration.cs" Link="mod/wizardry_integration.cs" />
     <Compile Include="../../stack_diagnostics.cs" Link="mod/stack_diagnostics.cs" />
     <Compile Include="../../routing_diagnostics.cs" Link="mod/routing_diagnostics.cs" />
+    <Compile Include="../../forget_override.cs" Link="mod/forget_override.cs" />
     <Compile Include="../../qi_debugger.cs" Link="mod/qi_debugger.cs" />
   </ItemGroup>
 

@@ -106,6 +106,7 @@ namespace Quartermaster_Integrations
 
         /// <summary>DropMoreLoot only: let its stack multiplier win instead of MaximumStackSize.</summary>
         public static ConfigEntry<bool> DeferToDropMoreLootStacks;
+        public static ConfigEntry<bool> ForgetRemovesEntry;
         public static ConfigEntry<Color> SufficientResourceColor;
         public static ConfigEntry<Color> InsufficientFlashBrightColor;
         public static ConfigEntry<Color> InsufficientFlashDarkColor;
@@ -194,6 +195,15 @@ namespace Quartermaster_Integrations
                 "stack tab says so. Turn this off to keep Quartermaster's stack override, which replaces " +
                 "DropMoreLoot's multiplied value.");
 
+            ForgetRemovesEntry = Config.Bind(
+                "1. General",
+                "ForgetRemovesEntry",
+                false,
+                "Quartermaster only. Its Forget button does not delete a chest entry - it moves the item " +
+                "to the chest's ignore list, where it keeps showing as '(ignored)' and keeps refusing " +
+                "storage. With this on, Forget and Forget All remove the entry from the chest outright, " +
+                "so the row disappears and putting a sample back teaches the chest again.");
+
             SufficientResourceColor = Config.Bind(
                 "2. Visuals",
                 "SufficientColor",
@@ -245,6 +255,7 @@ namespace Quartermaster_Integrations
             WizardryIntegration.Initialize(_harmony);
             StackDiagnostics.Initialize(_harmony);
             RoutingDiagnostics.Initialize(_harmony);
+            ForgetOverride.Initialize(_harmony);
 
             // Soft-dependency integrations set up their own patches; container-content invalidation
             // comes from Inventory.Changed (Container.Load ends in Inventory.Load, which calls

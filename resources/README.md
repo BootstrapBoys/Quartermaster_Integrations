@@ -75,6 +75,7 @@ Generated at `BepInEx/config/com.bootstrapboys.quartermaster_integrations.cfg` o
 | `1. General` | `DeferToOtherFormatting` | `false` | If AAA Crafting or AdventureBackpacks has already formatted a row, leave its text alone. Only enable this if you prefer their style. My Little UI's own "available resources amount" counts your pockets only, so deferring to it drops chest totals. |
 | `1. General` | `DeferToDropMoreLootStacks` | `true` | **DropMoreLoot only.** When its stacking is enabled, its multiplier wins and Quartermaster stops applying `MaximumStackSize`; the ledger's stack tab says so. Turn off to keep Quartermaster's stack size. |
 | `1. General` | `WardHostRange` | `true` | **WardIsLove only.** A Deposit Chest inside a ward runs its base on that ward's bubble instead of `BaseRange`, so its base/network range ends at the bubble edge. While you are inside a ward, only chests in that same bubble count for crafting. **Outside every ward, crafting is Quartermaster's `CraftRange` as normal** — a warded chest is still reachable if it falls within that range. |
+| `1. General` | `ForgetRemovesEntry` | `false` | **Quartermaster only.** Its Forget button does not delete a chest entry — it moves the item to the chest's ignore list, where it keeps showing as "(ignored)" and keeps refusing storage. With this on, Forget and Forget All remove the entry outright: the row disappears and putting a sample back teaches the chest again. |
 | `2. Visuals` | `SufficientColor` | `(0.68, 0.91, 0.90, 1.00)` | Color of the available count when you have enough. |
 | `2. Visuals` | `InsufficientFlashBrightColor` | `(1.00, 0.22, 0.22, 1.00)` | Bright end of the insufficient-material flash. |
 | `2. Visuals` | `InsufficientFlashDarkColor` | `(0.45, 0.02, 0.02, 1.00)` | Dark end of the insufficient-material flash. |
@@ -112,6 +113,7 @@ Set `DebugMode = true` under `3. Debug` and the mod writes `BepInEx/BSBLogs/Quar
 | `[PlanBuild] Plan costs include N storage container(s)` | PlanBuild is being offered storage (one line per 10 s) |
 | `[WardIsLove] Excluded '<chest>' … from storage` | ward permissions hid a chest from storage (one line per 10 s) |
 | `[WardHostRange] N container(s) reachable inside M ward bubble(s)` | what the bubble is contributing to crafting (one line per 10 s) |
+| `[Forget] 'item' removed from the chest (remembered=True, forgotten=False)` | Forget deletions when `ForgetRemovesEntry` is on (debug only) |
 | `[WardHostRange] inside N ward bubble(s), radius …` / `outside every ward` | entry/exit of a WardIsLove ward, checked twice a second (debug only) |
 | `[Wizardry] '<table>': N container(s) reachable` | a Wizardry table counted storage across CraftRange plus its own BaseRange (one line per 10 s) |
 | `[DropMoreLoot] Stack sizes defer to DropMoreLoot …` | startup line naming the multiplier in charge and the toggle state |

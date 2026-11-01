@@ -8,19 +8,21 @@ Every version that gets built is listed here, newest first — including builds 
 
 ## [2.7.4] - 2026-11-01
 
-Internal only: routing diagnostics now report where an item is assigned, why that chest is not a destination, the item id Quartermaster compares with, and sample entries from chests that remember something. No functional or display changes.
+### Added
+
+* **Forget can remove a chest entry outright.** Quartermaster's Forget button does not forget: it moves the item into the chest's ignore list, so the row stays on screen as "(ignored)" and the chest keeps refusing to store it - which reads as a routing failure. New setting `ForgetRemovesEntry` (default off) makes Forget and Forget All delete the entry from the chest, so the row disappears and putting a sample back teaches the chest from scratch.
 
 ---
 
 ## [2.7.3] - 2026-11-01
 
-Internal only: diagnostics for "No destination" routing. No functional or display changes.
+Internal only.
 
 ---
 
 ## [2.7.2] - 2026-11-01
 
-Internal only: diagnostics for refused stack merges. No functional or display changes.
+Internal only.
 
 ---
 

@@ -170,6 +170,7 @@ internal static class Program
         Field(qm, "Quartermaster.ChestSettings", "Deposit", "Boolean", false);
         Field(qm, "Quartermaster.ChestSettings", "Overflow", "Boolean", false);
         Field(qm, "Quartermaster.ChestSettings", "AutoAssign", "Boolean", false);
+        Method(qm, "Quartermaster.ChestSettings", "Forget", new[] { "String" }, "Void", false);
         Method(qm, "Quartermaster.SharedCrafting", "SourcesValid", new[] { "Player", "Container[]" }, "Boolean", true);
         Field(qm, "Quartermaster.ContainerRegistry", "All", "List`1", true);
         Method(qm, "Quartermaster.ContainerRegistry", "GetSettings", new[] { "Container" }, "ChestSettings", true);
