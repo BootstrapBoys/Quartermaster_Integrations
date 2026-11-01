@@ -34,6 +34,7 @@
     <Compile Include="../../ward_range.cs" Link="mod/ward_range.cs" />
     <Compile Include="../../dropmoreloot_integration.cs" Link="mod/dropmoreloot_integration.cs" />
     <Compile Include="../../wizardry_integration.cs" Link="mod/wizardry_integration.cs" />
+    <Compile Include="../../stack_diagnostics.cs" Link="mod/stack_diagnostics.cs" />
     <Compile Include="../../qi_debugger.cs" Link="mod/qi_debugger.cs" />
   </ItemGroup>
 

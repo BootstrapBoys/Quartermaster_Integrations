@@ -79,7 +79,7 @@ namespace Quartermaster_Integrations
         //
         // Versioning: bug fixes bump the patch digit (2.4.2 -> 2.4.3); adding an integration bumps the
         // minor and resets the patch (2.4.3 -> 2.5.0). Every bump gets a changelog entry.
-        public const string PluginVersion = "2.7.1";
+        public const string PluginVersion = "2.7.2";
 
         public const string QuartermasterGUID = "local.valheim.quartermaster";
         public const string MLUIGUID = "shudnal.MyLittleUI";
@@ -243,6 +243,7 @@ namespace Quartermaster_Integrations
             WardIsLoveIntegration.Initialize(_harmony);
             DropMoreLootIntegration.Initialize(_harmony);
             WizardryIntegration.Initialize(_harmony);
+            StackDiagnostics.Initialize(_harmony);
 
             // Soft-dependency integrations set up their own patches; container-content invalidation
             // comes from Inventory.Changed (Container.Load ends in Inventory.Load, which calls
