@@ -118,6 +118,7 @@ Set `DebugMode = true` under `2. Debug` and the mod writes `BepInEx/BSBLogs/Quar
 | `[Stacks] merging 'item' xN (Zebzz) with xM (looted): identical apart from the crafter` | a merge `IgnoreCrafter` allowed (debug only) |
 | `[WardHostRange] inside N ward bubble(s), radius …` / `outside every ward` | entry/exit of a WardIsLove ward, checked twice a second (debug only) |
 | `[Wizardry] '<table>': N container(s) reachable` | a Wizardry table counted storage across CraftRange plus its own BaseRange (one line per 10 s) |
+| `[Wizardry] '$piece_…_TW' pulls from base storage` | first time a Wizardry station is recognised, once per prefab name |
 | `[DropMoreLoot] Stack sizes defer to DropMoreLoot …` | startup line naming the multiplier in charge and the toggle state |
 | `[DropMoreLoot] Ledger stack tab: N control(s) disabled, toggle now reads …` | the stack tab was adjusted for the deferral (debug only) |
 
@@ -152,6 +153,6 @@ All three are enforced by Quartermaster, not by this mod, so the display follows
 
 **`WardHostRange` and a chest that won't count?** Inside a ward, only chests inside that same bubble count, the chest needs Crafting Supply on, must not be in use, and must be one you are permitted on. Outside every ward, crafting follows `CraftRange` exactly as before, including for chests that sit inside a ward — the bubble only bounds the base's own network range.
 
-**A Wizardry table still shows 0?** The table must be within Quartermaster's `BaseRange` (default 100 m) of the chests, the chests need Crafting Supply on, and `[Wizardry]` in the log should name the table it recognised. If it says nothing, the table was not matched to Wizardry's station list.
+**A Wizardry table still shows 0?** The table must be within Quartermaster's `BaseRange` (default 100 m) of the chests, the chests need Crafting Supply on, and `[Wizardry]` in the log should name the table it recognised. Stations are matched by their `_TW` prefab name (Wizardry's own station fields are never filled for three of the four), so a table from another mod that happens to end in `_TW` would also count.
 
 **Something else?** Set `DebugMode = true`, reproduce the issue, and include both `BepInEx/BSBLogs/QuarterMaster_Integrations.log` and `BepInEx/LogOutput.log` in your bug report.

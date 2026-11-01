@@ -30,16 +30,10 @@ namespace Quartermaster_Integrations
         public static bool IsReady { get; private set; }
         public static string BindError { get; private set; }
 
-        private static readonly string[] StationFields =
-        {
-            "WizardTable",
-            "ArcaneForge",
-            "WeavingLoom",
-            "PotionCauldron"
-        };
+        /// <summary>Every Wizardry crafting station prefab name ends with this.</summary>
+        private const string StationSuffix = "_TW";
 
-        private static readonly List<FieldInfo> StationRefs = new List<FieldInfo>();
-        private static readonly HashSet<string> StationNames = new HashSet<string>(StringComparer.Ordinal);
+        private static readonly HashSet<string> SeenStations = new HashSet<string>(StringComparer.Ordinal);
 
         private static List<Container> _allContainers;
         private static Func<Container, bool> _canSupply;
@@ -65,19 +59,6 @@ namespace Quartermaster_Integrations
 
             try
             {
-                Assembly wiz = info.Instance.GetType().Assembly;
-                Type plugin = wiz.GetType("WarfareWizardry.WizardryPlugin");
-
-                StationRefs.Clear();
-                foreach (string field in StationFields)
-                {
-                    FieldInfo reference = plugin?.GetField(
-                        field,
-                        BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-
-                    if (reference != null) StationRefs.Add(reference);
-                }
-
                 Assembly qm = BridgePlugin.QuartermasterAssembly;
                 Type registry = qm?.GetType("Quartermaster.ContainerRegistry");
                 Type transfers = qm?.GetType("Quartermaster.CraftStorageAccess");
@@ -104,11 +85,11 @@ namespace Quartermaster_Integrations
                     ? null
                     : AccessTools.Method(sharedCrafting, "SourcesValid", new[] { typeof(Player), typeof(Container[]) });
 
-                if (StationRefs.Count == 0 || _allContainers == null || canSupply == null || supplyField == null ||
+                if (_allContainers == null || canSupply == null || supplyField == null ||
                     _craftRange == null || _baseRange == null || nearby == null || sourcesValid == null)
                 {
                     BindError =
-                        $"stations={StationRefs.Count}, All={_allContainers != null}, CanSupply={canSupply != null}, " +
+                        $"All={_allContainers != null}, CanSupply={canSupply != null}, " +
                         $"CraftingSupply={supplyField != null}, CraftRange={_craftRange != null}, " +
                         $"BaseRange={_baseRange != null}, Nearby={nearby != null}, SourcesValid={sourcesValid != null}";
 
@@ -256,42 +237,24 @@ namespace Quartermaster_Integrations
         }
 
         /// <summary>
-        /// Compares by station name against Wizardry's four station objects. Read lazily because
-        /// Wizardry assigns them during its own registration, which can run after this plugin loads.
+        /// Wizardry builds its stations from prefabs named *_TW: WizardTable_TW, ArcaneAnvil_TW,
+        /// WeavingLoom_TW, PotionCauldron_TW and three table variants. Its own station fields cannot be
+        /// used - WizardryPlugin assigns WizardTable at every one of those registrations and never sets
+        /// ArcaneForge, WeavingLoom or PotionCauldron, so three of the four stay null for the whole
+        /// session and the last assignment (the cauldron) becomes the only name available.
         /// </summary>
         private static bool IsWizardryStation(CraftingStation station)
         {
-            if (station == null) return false;
+            string name = station?.m_name;
+            if (string.IsNullOrEmpty(name) || !name.EndsWith(StationSuffix, StringComparison.Ordinal)) return false;
 
-            // Re-read every time: Wizardry fills its four station fields during registration, which
-            // can finish after this plugin loads, and only some of them exist on a given save. Four
-            // field reads per craft is nothing next to locking in a partial list.
-            ResolveStationNames();
-            return StationNames.Count > 0 && StationNames.Contains(station.m_name);
-        }
-
-        private static void ResolveStationNames()
-        {
-            int before = StationNames.Count;
-
-            foreach (FieldInfo field in StationRefs)
+            if (QIDebugger.Enabled && SeenStations.Add(name))
             {
-                try
-                {
-                    if (!(field.GetValue(null) is CraftingStation reference) || reference == null) continue;
-                    if (!string.IsNullOrEmpty(reference.m_name)) StationNames.Add(reference.m_name);
-                }
-                catch
-                {
-                    // Registration not finished yet; the next craft retries.
-                }
+                QIDebugger.LogDebug(
+                    $"[Wizardry] '{name}' pulls from base storage ({SeenStations.Count} station(s) seen).");
             }
 
-            if (QIDebugger.Enabled && StationNames.Count > before)
-            {
-                QIDebugger.LogDebug($"[Wizardry] Stations ({StationNames.Count}/{StationRefs.Count}): " +
-                                    string.Join(", ", StationNames));
-            }
+            return true;
         }
 
         /// <summary>

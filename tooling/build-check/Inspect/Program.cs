@@ -138,10 +138,10 @@ internal static class Program
 
         // ---- Wizardry crafting tables ----------------------------------------------------------
         var wiz = Load(mlc, Path.Combine(Candidates, "Wizardry.dll"));
-        Field(wiz, "WarfareWizardry.WizardryPlugin", "WizardTable", "CraftingStation", true);
-        Field(wiz, "WarfareWizardry.WizardryPlugin", "ArcaneForge", "CraftingStation", true);
-        Field(wiz, "WarfareWizardry.WizardryPlugin", "WeavingLoom", "CraftingStation", true);
-        Field(wiz, "WarfareWizardry.WizardryPlugin", "PotionCauldron", "CraftingStation", true);
+        // Stations are matched by their *_TW prefab name: WizardryPlugin assigns WizardTable at every
+        // registration and never fills ArcaneForge, WeavingLoom or PotionCauldron, so those fields
+        // cannot identify its tables.
+        Method(wiz, "WarfareWizardry.WizardryPlugin", "Awake", new string[0], "Void", false);
         Field(qm, "Quartermaster.Plugin", "Range", "ConfigEntry`1", true);
 
         // ---- WardIsLove host range: every Quartermaster/WIL member the filter relies on ----------
