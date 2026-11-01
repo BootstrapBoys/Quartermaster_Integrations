@@ -67,6 +67,8 @@ namespace Quartermaster_Integrations
     [BepInDependency(EpicLootGUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(PlanBuildGUID, BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency(WardIsLoveGUID, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(DropMoreLootGUID, BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInDependency(WizardryGUID, BepInDependency.DependencyFlags.SoftDependency)]
     public class BridgePlugin : BaseUnityPlugin
     {
         public const string PluginGUID = "com.bootstrapboys.quartermaster_integrations";
@@ -77,7 +79,7 @@ namespace Quartermaster_Integrations
         //
         // Versioning: bug fixes bump the patch digit (2.4.2 -> 2.4.3); adding an integration bumps the
         // minor and resets the patch (2.4.3 -> 2.5.0). Every bump gets a changelog entry.
-        public const string PluginVersion = "2.6.4";
+        public const string PluginVersion = "2.7.0";
 
         public const string QuartermasterGUID = "local.valheim.quartermaster";
         public const string MLUIGUID = "shudnal.MyLittleUI";
@@ -89,6 +91,8 @@ namespace Quartermaster_Integrations
         public const string EpicLootContainerBridgeGUID = "KlownKiller.EpicLootContainerBridge";
         public const string PlanBuildGUID = "marcopogo.PlanBuild";
         public const string WardIsLoveGUID = "Azumatt.WardIsLove";
+        public const string DropMoreLootGUID = "TastyChickenLegs.DropMoreLoot";
+        public const string WizardryGUID = "Therzie.Wizardry";
 
         private readonly Harmony _harmony = new Harmony(PluginGUID);
         internal static ManualLogSource Log;
@@ -99,6 +103,9 @@ namespace Quartermaster_Integrations
 
         /// <summary>WardIsLove only: use the ward's radius as the crafting/storage range while inside it.</summary>
         public static ConfigEntry<bool> WardHostRange;
+
+        /// <summary>DropMoreLoot only: let its stack multiplier win instead of MaximumStackSize.</summary>
+        public static ConfigEntry<bool> DeferToDropMoreLootStacks;
         public static ConfigEntry<Color> SufficientResourceColor;
         public static ConfigEntry<Color> InsufficientFlashBrightColor;
         public static ConfigEntry<Color> InsufficientFlashDarkColor;
@@ -178,6 +185,15 @@ namespace Quartermaster_Integrations
                 "a craft may pull from - the ward bubble and your storage range become the same thing. " +
                 "Outside a ward nothing changes. Turn this off to always use Quartermaster's CraftRange.");
 
+            DeferToDropMoreLootStacks = Config.Bind(
+                "1. General",
+                "DeferToDropMoreLootStacks",
+                true,
+                "DropMoreLoot only. When DropMoreLoot's own stacking is enabled, its stack multiplier " +
+                "becomes the authority and Quartermaster stops applying MaximumStackSize - the ledger's " +
+                "stack tab says so. Turn this off to keep Quartermaster's stack override, which replaces " +
+                "DropMoreLoot's multiplied value.");
+
             SufficientResourceColor = Config.Bind(
                 "2. Visuals",
                 "SufficientColor",
@@ -225,6 +241,8 @@ namespace Quartermaster_Integrations
             EpicLootIntegration.Initialize(_harmony);
             PlanBuildIntegration.Initialize(_harmony);
             WardIsLoveIntegration.Initialize(_harmony);
+            DropMoreLootIntegration.Initialize(_harmony);
+            WizardryIntegration.Initialize(_harmony);
 
             // Soft-dependency integrations set up their own patches; container-content invalidation
             // comes from Inventory.Changed (Container.Load ends in Inventory.Load, which calls
@@ -237,7 +255,7 @@ namespace Quartermaster_Integrations
             QIDebugger.LogPatchInventory();
             QIDebugger.LogIntegrationSnapshot();
 
-            Log.LogInfo($"{PluginName} v{PluginVersion} loaded (MLUI: {MLUIIntegration.IsReady}, AAA: {AAACraftingIntegration.IsReady}, ExtraSlots: {ExtraSlotsIntegration.IsReady}, Backpacks: {AdventureBackpacksIntegration.IsReady}, BuildMenu: {AAABuildMenuIntegration.IsReady}, EpicLoot: {EpicLootIntegration.IsReady}, PlanBuild: {PlanBuildIntegration.IsReady}, WardIsLove: {WardIsLoveIntegration.IsReady}, QM storage query: {_countAvailableNearPlayer != null}, QM storages: {_craftStores != null}).");
+            Log.LogInfo($"{PluginName} v{PluginVersion} loaded (MLUI: {MLUIIntegration.IsReady}, AAA: {AAACraftingIntegration.IsReady}, ExtraSlots: {ExtraSlotsIntegration.IsReady}, Backpacks: {AdventureBackpacksIntegration.IsReady}, BuildMenu: {AAABuildMenuIntegration.IsReady}, EpicLoot: {EpicLootIntegration.IsReady}, PlanBuild: {PlanBuildIntegration.IsReady}, WardIsLove: {WardIsLoveIntegration.IsReady}, DropMoreLoot: {DropMoreLootIntegration.IsReady}, Wizardry: {WizardryIntegration.IsReady}, QM storage query: {_countAvailableNearPlayer != null}, QM storages: {_craftStores != null}).");
         }
 
         private void Start()

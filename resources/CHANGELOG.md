@@ -6,6 +6,17 @@ Every version that gets built is listed here, newest first — including builds 
 
 ---
 
+## [2.7.0] - 2026-11-01
+
+Two integrations, one minor bump.
+
+### Added
+
+* **Wizardry** (optional, `Therzie.Wizardry` 1.2.3+). While you craft at one of its tables (WizardTable, ArcaneForge, WeavingLoom, PotionCauldron), storage within Quartermaster's BaseRange of that table counts on top of CraftRange around you, so a table set away from the chest wall can still use the base's materials. The tables are ordinary crafting stations, so this is range only - CanSupply, the chest's Crafting Supply flag and ward permissions still decide what is usable.
+* **DropMoreLoot** (optional, `TastyChickenLegs.DropMoreLoot` 1.2.9+). New `1. General > DeferToDropMoreLootStacks` (default on): when DropMoreLoot's own stacking is enabled, its stack multiplier becomes the authority and Quartermaster stops applying MaximumStackSize. The ledger's stack tab now says which mod owns stack sizes instead of showing a number that is not in effect.
+
+---
+
 ## [2.6.4] - 2026-11-01
 
 ### Fixed

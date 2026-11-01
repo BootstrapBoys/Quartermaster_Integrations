@@ -128,6 +128,22 @@ internal static class Program
         var wil = Load(mlc, DepPath("WardIsLove.dll"));
         Method(wil, "WardIsLove.Util.CustomCheck", "CheckAccess", new[] { "Int64", "Vector3", "Single", "Boolean" }, "Boolean", true);
 
+        // ---- DropMoreLoot stack deferral -------------------------------------------------------
+        var dml = Load(mlc, Path.Combine(Candidates, "DropMoreLoot.dll"));
+        Field(dml, "DropMoreLoot.DropMoreLootMain", "enableStacking", "ConfigEntry`1", true);
+        Field(dml, "DropMoreLoot.DropMoreLootMain", "itemStackMultiplier", "ConfigEntry`1", true);
+        Method(qm, "Quartermaster.ItemStacks", "Configure", new[] { "Boolean", "Int32" }, "Void", true);
+        Method(qm, "Quartermaster.ChestUi", "StatusText", new string[0], "String", true);
+        Field(qm, "Quartermaster.ChestUi", "tab", "Int32", true);
+
+        // ---- Wizardry crafting tables ----------------------------------------------------------
+        var wiz = Load(mlc, Path.Combine(Candidates, "Wizardry.dll"));
+        Field(wiz, "WarfareWizardry.WizardryPlugin", "WizardTable", "CraftingStation", true);
+        Field(wiz, "WarfareWizardry.WizardryPlugin", "ArcaneForge", "CraftingStation", true);
+        Field(wiz, "WarfareWizardry.WizardryPlugin", "WeavingLoom", "CraftingStation", true);
+        Field(wiz, "WarfareWizardry.WizardryPlugin", "PotionCauldron", "CraftingStation", true);
+        Field(qm, "Quartermaster.Plugin", "Range", "ConfigEntry`1", true);
+
         // ---- WardIsLove host range: every Quartermaster/WIL member the filter relies on ----------
         Method(qm, "Quartermaster.BaseNetwork", "Contains", new[] { "Vector3" }, "Boolean", false);
         Method(qm, "Quartermaster.BaseNetwork", "CanTransfer", new[] { "Vector3", "Vector3" }, "Boolean", false);
