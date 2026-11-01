@@ -6,6 +6,12 @@ Every version that gets built is listed here, newest first — including builds 
 
 ---
 
+## [2.6.3] - 2026-11-01
+
+Internal only: dead code and redundant work removed. No functional or display changes.
+
+---
+
 ## [2.6.2] - 2026-10-31
 
 ### Added

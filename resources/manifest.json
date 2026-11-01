@@ -1,6 +1,6 @@
 {
   "name": "Quartermaster_Integrations",
-  "version_number": "2.6.2",
+  "version_number": "2.6.3",
   "website_url": "https://github.com/zebz213/Quartermaster_Integrations",
   "description": "Seamlessly integrates nearby Quartermaster storage chests into Valheim crafting UI requirements, max-craft calculations, and multi-craft batch processing.",
   "dependencies": [

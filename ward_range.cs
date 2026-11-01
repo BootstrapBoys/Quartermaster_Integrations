@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using BepInEx.Configuration;
 using HarmonyLib;
 using UnityEngine;
 
@@ -39,7 +38,6 @@ namespace Quartermaster_Integrations
             public float Radius;
         }
 
-        private static ConfigEntry<float> _craftRange;
         private static List<Container> _allContainers;
         private static Func<Container, bool> _canSupply;
         private static Func<Container, bool> _craftingSupply;
@@ -78,12 +76,10 @@ namespace Quartermaster_Integrations
             try
             {
                 Assembly qm = BridgePlugin.QuartermasterAssembly;
-                Type pluginType = qm?.GetType("Quartermaster.Plugin");
                 Type transfers = qm?.GetType("Quartermaster.CraftStorageAccess");
                 Type registry = qm?.GetType("Quartermaster.ContainerRegistry");
                 Type sharedCrafting = qm?.GetType("Quartermaster.SharedCrafting");
 
-                _craftRange = AccessTools.Field(pluginType, "CraftRange")?.GetValue(null) as ConfigEntry<float>;
                 _allContainers = AccessTools.Field(registry, "All")?.GetValue(null) as List<Container>;
 
                 MethodInfo canSupply = AccessTools.Method(transfers, "CanSupply", new[] { typeof(Container) });
@@ -120,13 +116,12 @@ namespace Quartermaster_Integrations
                     ? null
                     : AccessTools.Method(_baseNetworkType, "CanTransfer", new[] { typeof(Vector3), typeof(Vector3) });
 
-                if (_craftRange == null || _allContainers == null || canSupply == null || supplyField == null ||
+                if (_allContainers == null || canSupply == null || supplyField == null ||
                     _allAreas == null || _wardType == null || _getWardRadius == null ||
                     nearby == null || sourcesValid == null ||
                     contains == null || canTransfer == null || _networksField == null)
                 {
                     BindError =
-                        $"CraftRange={_craftRange != null}, ContainerRegistry.All={_allContainers != null}, " +
                         $"CanSupply={canSupply != null}, CraftingSupply={supplyField != null}, " +
                         $"m_allAreas={_allAreas != null}, WardMonoscript={_wardType != null}, " +
                         $"GetWardRadius={_getWardRadius != null}, Nearby={nearby != null}, " +
@@ -304,15 +299,16 @@ namespace Quartermaster_Integrations
         // ---- crafting range ----------------------------------------------------------------------
 
         /// <summary>
-        /// Inside a ward: only the bubble counts. Outside every ward: Quartermaster's CraftRange,
-        /// minus bases that are hosted in a ward (those are only reachable from inside it).
+        /// While the player stands in a ward, only chests inside that same bubble are offered.
+        /// Outside every ward this stands down entirely: Quartermaster's own CraftRange is already
+        /// the rule there, so there is nothing to substitute or duplicate.
         /// </summary>
         public static bool Nearby_Prefix(Player player, ref IEnumerable<Container> __result)
         {
             if (!Active || player == null) return true;
 
-            List<Bubble> wards = AllWards();
-            if (wards.Count == 0) return true;   // no wards in the world: leave Quartermaster alone
+            List<Bubble> playerWards = PlayerWards(player);
+            if (playerWards.Count == 0) return true;
 
             int frame = Time.frameCount;
             if (frame == _cachedSourcesFrame && _cachedSources != null)
@@ -322,10 +318,8 @@ namespace Quartermaster_Integrations
             }
 
             Vector3 playerPosition = player.transform.position;
-            List<Bubble> playerWards = wards.Where(w => Inside(w, playerPosition)).ToList();
-            bool insideWard = playerWards.Count > 0;
-
             List<Container> sources = new List<Container>();
+
             foreach (Container container in _allContainers)
             {
                 if (container == null) continue;
@@ -333,7 +327,10 @@ namespace Quartermaster_Integrations
                 try
                 {
                     if (!_canSupply(container) || !_craftingSupply(container)) continue;
-                    if (Reachable(player, container, playerWards, insideWard)) sources.Add(container);
+                    if (!InsideAny(playerWards, container.transform.position)) continue;
+                    if (!WardIsLoveIntegration.IsPermitted(player, container)) continue;
+
+                    sources.Add(container);
                 }
                 catch (Exception ex)
                 {
@@ -352,8 +349,7 @@ namespace Quartermaster_Integrations
             {
                 _lastLogTime = Time.time;
                 QIDebugger.LogDebug(
-                    $"[WardHostRange] {sources.Count} container(s) reachable " +
-                    (insideWard ? $"inside {playerWards.Count} ward bubble(s)." : "by Quartermaster range outside wards."));
+                    $"[WardHostRange] {sources.Count} container(s) reachable inside {playerWards.Count} ward bubble(s).");
             }
 
             __result = sources;
@@ -370,12 +366,8 @@ namespace Quartermaster_Integrations
         {
             if (!Active || player == null || sources == null) return true;
 
-            List<Bubble> wards = AllWards();
-            if (wards.Count == 0) return true;
-
-            Vector3 playerPosition = player.transform.position;
-            List<Bubble> playerWards = wards.Where(w => Inside(w, playerPosition)).ToList();
-            bool insideWard = playerWards.Count > 0;
+            List<Bubble> playerWards = PlayerWards(player);
+            if (playerWards.Count == 0) return true;
 
             __result = sources.All(container =>
             {
@@ -384,7 +376,8 @@ namespace Quartermaster_Integrations
                 try
                 {
                     if (!_canSupply(container) || !_craftingSupply(container)) return false;
-                    return Reachable(player, container, playerWards, insideWard);
+                    if (!InsideAny(playerWards, container.transform.position)) return false;
+                    return WardIsLoveIntegration.IsPermitted(player, container);
                 }
                 catch
                 {
@@ -395,25 +388,28 @@ namespace Quartermaster_Integrations
             return false;
         }
 
-        private static bool Reachable(Player player, Container container, List<Bubble> playerWards, bool insideWard)
+        private static List<Bubble> PlayerWards(Player player)
         {
-            Vector3 position = container.transform.position;
+            List<Bubble> wards = AllWards();
+            Vector3 playerPosition = player.transform.position;
 
-            if (insideWard)
+            List<Bubble> inside = new List<Bubble>(1);
+            for (int i = 0; i < wards.Count; i++)
             {
-                // Strict: while in a bubble, nothing outside it counts.
-                for (int i = 0; i < playerWards.Count; i++)
-                {
-                    if (Inside(playerWards[i], position)) return WardIsLoveIntegration.IsPermitted(player, container);
-                }
-
-                return false;
+                if (Inside(wards[i], playerPosition)) inside.Add(wards[i]);
             }
 
-            // Outside every bubble, crafting is plain Quartermaster: CraftRange from the player, with
-            // no ward involvement at all. A chest inside a ward is reachable from outside if it is
-            // within CraftRange - only the base's own network range is bubble-bound.
-            return (position - player.transform.position).sqrMagnitude <= CraftRangeSquared();
+            return inside;
+        }
+
+        private static bool InsideAny(List<Bubble> wards, Vector3 position)
+        {
+            for (int i = 0; i < wards.Count; i++)
+            {
+                if (Inside(wards[i], position)) return true;
+            }
+
+            return false;
         }
 
         // ---- ward geometry -----------------------------------------------------------------------
@@ -492,11 +488,5 @@ namespace Quartermaster_Integrations
 
         private static bool Inside(Bubble ward, Vector3 position) =>
             Utils.DistanceXZ(ward.Centre, position) <= ward.Radius;
-
-        private static float CraftRangeSquared()
-        {
-            float range = _craftRange != null ? _craftRange.Value : 100f;
-            return range * range;
-        }
     }
 }
