@@ -40,7 +40,6 @@ namespace Quartermaster_Integrations
 
         private static readonly List<FieldInfo> StationRefs = new List<FieldInfo>();
         private static readonly HashSet<string> StationNames = new HashSet<string>(StringComparer.Ordinal);
-        private static bool _namesResolved;
 
         private static List<Container> _allContainers;
         private static Func<Container, bool> _canSupply;
@@ -264,34 +263,34 @@ namespace Quartermaster_Integrations
         {
             if (station == null) return false;
 
-            if (!_namesResolved) ResolveStationNames();
+            // Re-read every time: Wizardry fills its four station fields during registration, which
+            // can finish after this plugin loads, and only some of them exist on a given save. Four
+            // field reads per craft is nothing next to locking in a partial list.
+            ResolveStationNames();
             return StationNames.Count > 0 && StationNames.Contains(station.m_name);
         }
 
         private static void ResolveStationNames()
         {
+            int before = StationNames.Count;
+
             foreach (FieldInfo field in StationRefs)
             {
                 try
                 {
                     if (!(field.GetValue(null) is CraftingStation reference) || reference == null) continue;
-
-                    if (!string.IsNullOrEmpty(reference.m_name))
-                    {
-                        StationNames.Add(reference.m_name);
-                    }
+                    if (!string.IsNullOrEmpty(reference.m_name)) StationNames.Add(reference.m_name);
                 }
                 catch
                 {
-                    // Registration not finished yet; try again on the next craft.
+                    // Registration not finished yet; the next craft retries.
                 }
             }
 
-            _namesResolved = StationNames.Count > 0;
-
-            if (_namesResolved && QIDebugger.Enabled)
+            if (QIDebugger.Enabled && StationNames.Count > before)
             {
-                QIDebugger.LogDebug("[Wizardry] Stations: " + string.Join(", ", StationNames));
+                QIDebugger.LogDebug($"[Wizardry] Stations ({StationNames.Count}/{StationRefs.Count}): " +
+                                    string.Join(", ", StationNames));
             }
         }
 

@@ -6,6 +6,14 @@ Every version that gets built is listed here, newest first — including builds 
 
 ---
 
+## [2.7.1] - 2026-11-01
+
+### Fixed
+
+* **Wizardry recognised only one of its four crafting tables.** The station list was resolved once and locked on the first match, so whichever of WizardTable, ArcaneForge, WeavingLoom or PotionCauldron registered first became the whole set and the rest still showed pockets only. The list is now re-read on use, and the debug line reports how many of the four it knows.
+
+---
+
 ## [2.7.0] - 2026-11-01
 
 Two integrations, one minor bump.
