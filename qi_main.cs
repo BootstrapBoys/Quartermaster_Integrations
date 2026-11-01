@@ -107,6 +107,7 @@ namespace Quartermaster_Integrations
         /// <summary>DropMoreLoot only: let its stack multiplier win instead of MaximumStackSize.</summary>
         public static ConfigEntry<bool> DeferToDropMoreLootStacks;
         public static ConfigEntry<bool> ForgetRemovesEntry;
+        public static ConfigEntry<bool> StackAcrossCrafters;
         public static ConfigEntry<Color> SufficientResourceColor;
         public static ConfigEntry<Color> InsufficientFlashBrightColor;
         public static ConfigEntry<Color> InsufficientFlashDarkColor;
@@ -154,13 +155,13 @@ namespace Quartermaster_Integrations
         {
             Log = Logger;
 
-            ModEnabled = Config.Bind(
+ModEnabled = Config.Bind(
                 "1. General",
                 "Enabled",
                 true,
                 "Enable or disable the Quartermaster Integrations mod.");
 
-            DisplayMode = Config.Bind(
+DisplayMode = Config.Bind(
                 "1. General",
                 "RequirementDisplayMode",
                 RequirementDisplayMode.CombinedTotal,
@@ -169,7 +170,7 @@ namespace Quartermaster_Integrations
                 "SplitInventoryAndStorage = 10 (4+12) [Req (Inv+QM)]\n" +
                 "TotalWithSplit = 10 (16 [4+12])");
 
-            DeferToOtherFormatting = Config.Bind(
+DeferToOtherFormatting = Config.Bind(
                 "1. General",
                 "DeferToOtherFormatting",
                 false,
@@ -177,16 +178,7 @@ namespace Quartermaster_Integrations
                 "has already formatted it. Vanilla's own text is a bare number, so this only triggers when " +
                 "something else has decorated the row. Enable it if you prefer their 'have/need' display.");
 
-            WardHostRange = Config.Bind(
-                "1. General",
-                "WardHostRange",
-                true,
-                "WardIsLove only. While you are inside one of its wards, that ward's radius replaces " +
-                "Quartermaster's CraftRange for the crafting counts, the max-craft number and which chests " +
-                "a craft may pull from - the ward bubble and your storage range become the same thing. " +
-                "Outside a ward nothing changes. Turn this off to always use Quartermaster's CraftRange.");
-
-            DeferToDropMoreLootStacks = Config.Bind(
+DeferToDropMoreLootStacks = Config.Bind(
                 "1. General",
                 "DeferToDropMoreLootStacks",
                 true,
@@ -195,8 +187,47 @@ namespace Quartermaster_Integrations
                 "stack tab says so. Turn this off to keep Quartermaster's stack override, which replaces " +
                 "DropMoreLoot's multiplied value.");
 
-            ForgetRemovesEntry = Config.Bind(
-                "1. General",
+DebugMode = Config.Bind(
+                "2. Debug",
+                "DebugMode",
+                false,
+                "Enable detailed debug logging to file and console.");
+
+SufficientResourceColor = Config.Bind(
+                "3. Visuals",
+                "SufficientColor",
+                new Color(0.68f, 0.91f, 0.90f, 1f),
+                "Text color for available resource counts when you have enough components.");
+
+InsufficientFlashBrightColor = Config.Bind(
+                "3. Visuals",
+                "InsufficientFlashBrightColor",
+                new Color(1f, 0.22f, 0.22f, 1f),
+                "Primary bright red color when flashing insufficient crafting requirements.");
+
+InsufficientFlashDarkColor = Config.Bind(
+                "3. Visuals",
+                "InsufficientFlashDarkColor",
+                new Color(0.45f, 0.02f, 0.02f, 1f),
+                "Secondary dark red color when flashing insufficient crafting requirements.");
+
+FlashSpeed = Config.Bind(
+                "3. Visuals",
+                "FlashSpeed",
+                4.0f,
+                new ConfigDescription("Flashing speed when lacking components to craft.", new AcceptableValueRange<float>(1f, 12f)));
+
+WardHostRange = Config.Bind(
+                "4. Patches",
+                "WardHostRange",
+                true,
+                "WardIsLove only. While you are inside one of its wards, that ward's radius replaces " +
+                "Quartermaster's CraftRange for the crafting counts, the max-craft number and which chests " +
+                "a craft may pull from - the ward bubble and your storage range become the same thing. " +
+                "Outside a ward nothing changes. Turn this off to always use Quartermaster's CraftRange.");
+
+ForgetRemovesEntry = Config.Bind(
+                "4. Patches",
                 "ForgetRemovesEntry",
                 false,
                 "Quartermaster only. Its Forget button does not delete a chest entry - it moves the item " +
@@ -204,36 +235,15 @@ namespace Quartermaster_Integrations
                 "storage. With this on, Forget and Forget All remove the entry from the chest outright, " +
                 "so the row disappears and putting a sample back teaches the chest again.");
 
-            SufficientResourceColor = Config.Bind(
-                "2. Visuals",
-                "SufficientColor",
-                new Color(0.68f, 0.91f, 0.90f, 1f),
-                "Text color for available resource counts when you have enough components.");
-
-            InsufficientFlashBrightColor = Config.Bind(
-                "2. Visuals",
-                "InsufficientFlashBrightColor",
-                new Color(1f, 0.22f, 0.22f, 1f),
-                "Primary bright red color when flashing insufficient crafting requirements.");
-
-            InsufficientFlashDarkColor = Config.Bind(
-                "2. Visuals",
-                "InsufficientFlashDarkColor",
-                new Color(0.45f, 0.02f, 0.02f, 1f),
-                "Secondary dark red color when flashing insufficient crafting requirements.");
-
-            FlashSpeed = Config.Bind(
-                "2. Visuals",
-                "FlashSpeed",
-                4.0f,
-                new ConfigDescription("Flashing speed when lacking components to craft.", new AcceptableValueRange<float>(1f, 12f)));
-
-            DebugMode = Config.Bind(
-                "3. Debug",
-                "DebugMode",
+            StackAcrossCrafters = Config.Bind(
+                "4. Patches",
+                "StackAcrossCrafters",
                 false,
-                "Enable detailed debug logging to file and console.");
-
+                "Quartermaster only. It refuses to merge two stacks whose crafter differs, so core wood " +
+                "crafted at a bench will not stack with core wood you picked up - vanilla ignores the " +
+                "crafter entirely. With this on, materials merge when the crafter is the only difference: " +
+                "same item, quality, variant, world level, durability, cheat flag and custom data. Gear, " +
+                "enchanted and world-levelled items keep Quartermaster's rule.");
             UpdateCachedColors();
             SufficientResourceColor.SettingChanged += (_, __) => UpdateCachedColors();
 
@@ -256,6 +266,7 @@ namespace Quartermaster_Integrations
             StackDiagnostics.Initialize(_harmony);
             RoutingDiagnostics.Initialize(_harmony);
             ForgetOverride.Initialize(_harmony);
+            StackCrafterPatch.Initialize(_harmony);
 
             // Soft-dependency integrations set up their own patches; container-content invalidation
             // comes from Inventory.Changed (Container.Load ends in Inventory.Load, which calls
