@@ -30,7 +30,6 @@ Puts Quartermaster's nearby storage into the crafting window: how much of each i
 | **Epic Loot** (`randyknapp.mods.epicloot`) | No — 0.15.5+ | Enchanting and sacrifice costs can be paid from storage; the items are actually taken from the chests. **Not compatible with EpicLootContainerBridge** — that bridge already reports storage, so the provider stays off while it is installed |
 | **PlanBuild** (`marcopogo.PlanBuild`) | No — 0.20.0+ | Plan pieces can be placed from storage, including "hold to add materials" |
 | **WardIsLove** (`Azumatt.WardIsLove`) | No — 4.0.9+ | Chests inside a ward you are not permitted on are excluded from counts and never pulled from; a Deposit Chest inside a ward runs its whole base on that bubble (`WardHostRange`) |
-| **Wizardry** (`Therzie.Wizardry`) | No — 1.2.3+ | Its wizard table, arcane forge, weaving loom and potion cauldron reach base storage across the table's `BaseRange` |
 | **DropMoreLoot** (`TastyChickenLegs.DropMoreLoot`) | No — 1.2.9+ | Its stack multiplier is respected; Quartermaster's stack override steps aside (`DeferToDropMoreLootStacks`) and the ledger's stack-size toggle is disabled and labelled with DropMoreLoot's multiplier |
 
 Every optional integration is reflection-bound at startup and reports what it found. Missing one costs you that specific convenience, never the mod itself.
@@ -82,7 +81,7 @@ Generated at `BepInEx/config/com.bootstrapboys.quartermaster_integrations.cfg` o
 | `3. Visuals` | `InsufficientFlashDarkColor` | `(0.45, 0.02, 0.02, 1.00)` | Dark end of the insufficient-material flash. |
 | `3. Visuals` | `FlashSpeed` | `4.0` | Flash speed, 1–12. |
 | `2. Debug` | `DebugMode` | `false` | Timestamped diagnostic log written to `BepInEx/BSBLogs/QuarterMaster_Integrations.log`. |
-| `2. Debug` | `EnableAAACrafting`, `EnableAAABuildMenu`, `EnableMyLittleUI`, `EnableExtraSlots`, `EnableAdventureBackpacks`, `EnableEpicLoot`, `EnablePlanBuild`, `EnableWardIsLove`, `EnableWizardry`, `EnableDropMoreLoot` | `true` | One switch per integration, all under 2. Debug next to `DebugMode`. Off means that mod is left entirely alone: no storage counts, no filtered chests, no patched UI. Changes apply immediately, no restart. Turning everything off leaves Quartermaster behaving as if this mod were not installed. |
+| `2. Debug` | `EnableAAACrafting`, `EnableAAABuildMenu`, `EnableMyLittleUI`, `EnableExtraSlots`, `EnableAdventureBackpacks`, `EnableEpicLoot`, `EnablePlanBuild`, `EnableWardIsLove`, `EnableDropMoreLoot` | `true` | One switch per integration, all under 2. Debug next to `DebugMode`. Off means that mod is left entirely alone: no storage counts, no filtered chests, no patched UI. Changes apply immediately, no restart. Turning everything off leaves Quartermaster behaving as if this mod were not installed. |
 
 ### Display modes
 
@@ -118,8 +117,6 @@ Set `DebugMode = true` under `2. Debug` and the mod writes `BepInEx/BSBLogs/Quar
 | `[Forget] 'item' removed from the chest (remembered=True, forgotten=False)` | Forget deletions when `ForgetRemovesEntry` is on (debug only) |
 | `[Stacks] merging 'item' xN (Zebzz) with xM (looted): identical apart from the crafter` | a merge `IgnoreCrafter` allowed (debug only) |
 | `[WardHostRange] inside N ward bubble(s), radius …` / `outside every ward` | entry/exit of a WardIsLove ward, checked twice a second (debug only) |
-| `[Wizardry] '<table>': N container(s) reachable` | a Wizardry table counted storage across CraftRange plus its own BaseRange (one line per 10 s) |
-| `[Wizardry] '$piece_…_TW' pulls from base storage` | first time a Wizardry station is recognised, once per prefab name |
 | `[DropMoreLoot] Stack sizes defer to DropMoreLoot …` | startup line naming the multiplier in charge and the toggle state |
 | `[DropMoreLoot] Ledger stack tab: N control(s) disabled, toggle now reads …` | the stack tab was adjusted for the deferral (debug only) |
 
@@ -154,6 +151,5 @@ All three are enforced by Quartermaster, not by this mod, so the display follows
 
 **`WardHostRange` and a chest that won't count?** Inside a ward, only chests inside that same bubble count, the chest needs Crafting Supply on, must not be in use, and must be one you are permitted on. Outside every ward, crafting follows `CraftRange` exactly as before, including for chests that sit inside a ward — the bubble only bounds the base's own network range.
 
-**A Wizardry table still shows 0?** The table must be within Quartermaster's `BaseRange` (default 100 m) of the chests, the chests need Crafting Supply on, and `[Wizardry]` in the log should name the table it recognised. Stations are matched by their `_TW` prefab name (Wizardry's own station fields are never filled for three of the four), so a table from another mod that happens to end in `_TW` would also count.
 
 **Something else?** Set `DebugMode = true`, reproduce the issue, and include both `BepInEx/BSBLogs/QuarterMaster_Integrations.log` and `BepInEx/LogOutput.log` in your bug report.

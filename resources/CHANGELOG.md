@@ -6,6 +6,14 @@ Every version that gets built is listed here, newest first — including builds 
 
 ---
 
+## [2.7.5] - 2026-11-02
+
+### Removed
+
+* **The Wizardry integration is gone.** Wizardry's wizard table, arcane forge, weaving loom and potion cauldron already pull from Quartermaster storage through the normal `CraftRange`, with no special handling - verified in game with the integration switched off. Its switch under 2. Debug is gone with it; nothing else changes.
+
+---
+
 ## [2.7.4] - 2026-11-01
 
 ### Added

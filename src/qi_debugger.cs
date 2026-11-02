@@ -295,7 +295,6 @@ namespace Quartermaster_Integrations
                 $"ExtraSlots: {ExtraSlotsIntegration.IsReady}, " +
                 $"Backpacks: {AdventureBackpacksIntegration.IsReady}, " +
                 $"MLUI: {MLUIIntegration.IsReady}, " +
-                $"Wizardry: {WizardryIntegration.IsReady}, " +
                 $"DropMoreLoot: {DropMoreLootIntegration.IsReady}");
 
             LogDebug(
