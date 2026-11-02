@@ -12,9 +12,9 @@ Player-facing documentation — features, config, integrations, troubleshooting 
 
 | Path | What it is |
 | :--- | :--- |
-| `qi_main.cs` | Plugin entry point, Harmony patches, storage-query binding |
-| `qi_debugger.cs` | All diagnostics: log file, patch inventory, craft snapshots |
-| `*_integration.cs` | One file per soft dependency (AAA Crafting, My Little UI, ExtraSlots, AdventureBackpacks, AAABuildMenu, Epic Loot, PlanBuild, WardIsLove) |
+| `src/qi_main.cs` | Plugin entry point, Harmony patches, storage-query binding |
+| `src/qi_debugger.cs` | All diagnostics: log file, patch inventory, craft snapshots |
+| `src/*_integration.cs` | One file per soft dependency (AAA Crafting, My Little UI, ExtraSlots, AdventureBackpacks, AAABuildMenu, Epic Loot, PlanBuild, WardIsLove) |
 | `resources/` | Packaging metadata: `manifest.json`, README, CHANGELOG, icon |
 | `tooling/build.sh` | Build → binding audit → drop candidate in `artifacts/debug` → clean |
 | `tooling/decompile.sh` | Decompile a dependency DLL for reading (output to `/tmp`) |
@@ -50,7 +50,7 @@ none of them are hard dependencies. The only hard dependency is Quartermaster.
 
 ## Versioning
 
-Version lives in four places — `PluginVersion` in `qi_main.cs`, the csproj (`Version`,
+Version lives in four places — `PluginVersion` in `src/qi_main.cs`, the csproj (`Version`,
 `AssemblyVersion`, `FileVersion`), `resources/manifest.json`, and the top `resources/CHANGELOG.md`
 heading. Fixes bump the patch digit; a new integration bumps the minor and resets the patch.
 `Awake()` warns in the log if the built assembly disagrees with `PluginVersion`.

@@ -22,24 +22,24 @@
 
   <ItemGroup>
     <Compile Include="Stubs.cs" />
-    <Compile Include="../../qi_main.cs" Link="mod/qi_main.cs" />
-    <Compile Include="../../aaacrafting_integration.cs" Link="mod/aaacrafting_integration.cs" />
-    <Compile Include="../../adventurebackpacks_integration.cs" Link="mod/adventurebackpacks_integration.cs" />
-    <Compile Include="../../extraslots_integration.cs" Link="mod/extraslots_integration.cs" />
-    <Compile Include="../../mlui_integration.cs" Link="mod/mlui_integration.cs" />
-    <Compile Include="../../aaabuildmenu_integration.cs" Link="mod/aaabuildmenu_integration.cs" />
-    <Compile Include="../../epicloot_integration.cs" Link="mod/epicloot_integration.cs" />
-    <Compile Include="../../planbuild_integration.cs" Link="mod/planbuild_integration.cs" />
-    <Compile Include="../../wardislove_integration.cs" Link="mod/wardislove_integration.cs" />
-    <Compile Include="../../ward_range.cs" Link="mod/ward_range.cs" />
-    <Compile Include="../../dropmoreloot_integration.cs" Link="mod/dropmoreloot_integration.cs" />
-    <Compile Include="../../wizardry_integration.cs" Link="mod/wizardry_integration.cs" />
-    <Compile Include="../../stack_diagnostics.cs" Link="mod/stack_diagnostics.cs" />
-    <Compile Include="../../routing_diagnostics.cs" Link="mod/routing_diagnostics.cs" />
-    <Compile Include="../../forget_override.cs" Link="mod/forget_override.cs" />
-    <Compile Include="../../stack_crafter_patch.cs" Link="mod/stack_crafter_patch.cs" />
-    <Compile Include="../../config_order.cs" Link="mod/config_order.cs" />
-    <Compile Include="../../qi_debugger.cs" Link="mod/qi_debugger.cs" />
+    <Compile Include="../../src/qi_main.cs" Link="mod/qi_main.cs" />
+    <Compile Include="../../src/aaacrafting_integration.cs" Link="mod/aaacrafting_integration.cs" />
+    <Compile Include="../../src/adventurebackpacks_integration.cs" Link="mod/adventurebackpacks_integration.cs" />
+    <Compile Include="../../src/extraslots_integration.cs" Link="mod/extraslots_integration.cs" />
+    <Compile Include="../../src/mlui_integration.cs" Link="mod/mlui_integration.cs" />
+    <Compile Include="../../src/aaabuildmenu_integration.cs" Link="mod/aaabuildmenu_integration.cs" />
+    <Compile Include="../../src/epicloot_integration.cs" Link="mod/epicloot_integration.cs" />
+    <Compile Include="../../src/planbuild_integration.cs" Link="mod/planbuild_integration.cs" />
+    <Compile Include="../../src/wardislove_integration.cs" Link="mod/wardislove_integration.cs" />
+    <Compile Include="../../src/ward_range.cs" Link="mod/ward_range.cs" />
+    <Compile Include="../../src/dropmoreloot_integration.cs" Link="mod/dropmoreloot_integration.cs" />
+    <Compile Include="../../src/wizardry_integration.cs" Link="mod/wizardry_integration.cs" />
+    <Compile Include="../../src/stack_diagnostics.cs" Link="mod/stack_diagnostics.cs" />
+    <Compile Include="../../src/routing_diagnostics.cs" Link="mod/routing_diagnostics.cs" />
+    <Compile Include="../../src/forget_override.cs" Link="mod/forget_override.cs" />
+    <Compile Include="../../src/stack_crafter_patch.cs" Link="mod/stack_crafter_patch.cs" />
+    <Compile Include="../../src/config_order.cs" Link="mod/config_order.cs" />
+    <Compile Include="../../src/qi_debugger.cs" Link="mod/qi_debugger.cs" />
   </ItemGroup>
 
 </Project>

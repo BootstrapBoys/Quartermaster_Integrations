@@ -21,7 +21,7 @@ OUT="artifacts/debug"
 mkdir -p "$OUT"
 cp bin/Release/net48/QuarterMaster_Integrations.dll "$OUT/QuarterMaster_Integrations.dll"
 
-VERSION=$(grep -oP 'PluginVersion = "\K[0-9.]+' qi_main.cs)
+VERSION=$(grep -oP 'PluginVersion = "\K[0-9.]+' src/qi_main.cs)
 SHA=$(python3 -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" \
       "$OUT/QuarterMaster_Integrations.dll")
 

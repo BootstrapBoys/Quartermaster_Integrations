@@ -68,7 +68,7 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           set -euo pipefail
-          grep -q "PluginVersion = \"$VERSION\"" qi_main.cs
+          grep -q "PluginVersion = \"$VERSION\"" src/qi_main.cs
           grep -q "<Version>$VERSION</Version>" QuarterMaster_Integrations.csproj
           python3 - <<'PY'
           import json, os
