@@ -96,19 +96,24 @@ namespace Quartermaster_Integrations
 
             int aCount = a.m_customData?.Count ?? 0;
             int bCount = b.m_customData?.Count ?? 0;
-            if (aCount != bCount)
+            if (aCount != bCount || (a.m_customData != null && b.m_customData != null))
             {
-                Add("customData entries", aCount, bCount);
-            }
-            else if (a.m_customData != null)
-            {
-                foreach (KeyValuePair<string, string> pair in a.m_customData)
+                HashSet<string> keys = new HashSet<string>(StringComparer.Ordinal);
+                if (a.m_customData != null) foreach (string key in a.m_customData.Keys) keys.Add(key);
+                if (b.m_customData != null) foreach (string key in b.m_customData.Keys) keys.Add(key);
+
+                foreach (string key in keys)
                 {
-                    b.m_customData.TryGetValue(pair.Key, out string other);
-                    if (!string.Equals(pair.Value, other, StringComparison.Ordinal))
-                    {
-                        Add("customData " + pair.Key, pair.Value ?? "", other ?? "");
-                    }
+                    string left = null, right = null;
+                    bool hasLeft = a.m_customData != null && a.m_customData.TryGetValue(key, out left);
+                    bool hasRight = b.m_customData != null && b.m_customData.TryGetValue(key, out right);
+                    if (hasLeft == hasRight && string.Equals(left, right, StringComparison.Ordinal)) continue;
+
+                    // Name the entry itself: a plain material carrying custom data is usually Epic
+                    // Loot or a mod tag, and the key says which.
+                    Add("customData " + key,
+                        hasLeft ? left ?? "" : "<absent>",
+                        hasRight ? right ?? "" : "<absent>");
                 }
             }
 
