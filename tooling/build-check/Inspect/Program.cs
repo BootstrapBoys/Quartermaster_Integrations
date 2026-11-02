@@ -129,7 +129,7 @@ internal static class Program
         Method(wil, "WardIsLove.Util.CustomCheck", "CheckAccess", new[] { "Int64", "Vector3", "Single", "Boolean" }, "Boolean", true);
 
         // ---- DropMoreLoot stack deferral -------------------------------------------------------
-        var dml = Load(mlc, Path.Combine(Candidates, "DropMoreLoot.dll"));
+        var dml = Load(mlc, DepPath("DropMoreLoot.dll"));
         Field(dml, "DropMoreLoot.DropMoreLootMain", "enableStacking", "ConfigEntry`1", true);
         Field(dml, "DropMoreLoot.DropMoreLootMain", "itemStackMultiplier", "ConfigEntry`1", true);
         Method(qm, "Quartermaster.ItemStacks", "Configure", new[] { "Boolean", "Int32" }, "Void", true);
@@ -137,7 +137,7 @@ internal static class Program
         Field(qm, "Quartermaster.ChestUi", "body", "RectTransform", true);
 
         // ---- Wizardry crafting tables ----------------------------------------------------------
-        var wiz = Load(mlc, Path.Combine(Candidates, "Wizardry.dll"));
+        var wiz = Load(mlc, DepPath("Wizardry.dll"));
         // Stations are matched by their *_TW prefab name: WizardryPlugin assigns WizardTable at every
         // registration and never fills ArcaneForge, WeavingLoom or PotionCauldron, so those fields
         // cannot identify its tables.

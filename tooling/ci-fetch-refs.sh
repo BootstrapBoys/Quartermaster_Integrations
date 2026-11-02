@@ -115,6 +115,8 @@ AAABUILDMENU_VERSION="1.0.6"
 EPICLOOT_PKG="RandyKnapp-EpicLoot-0.15.5"
 PLANBUILD_PKG="MathiasDecrock-PlanBuild-0.20.0"
 WARDISLOVE_VERSION="4.0.9"
+WIZARDRY_PKG="Therzie-Wizardry-1.2.3"
+DROPMORELOOT_PKG="TastyChickenLegs-DropMoreLoot-1.2.9"
 
 # Optional dependencies the binding audit checks, at the versions the code is written against.
 thunderstore "$MYLITTLEUI_PKG" MyLittleUI.dll MyLittleUI.dll
@@ -133,6 +135,8 @@ hexium Azumatt WardIsLove "$WARDISLOVE_VERSION" WardIsLove.dll
 # Integrations that must actually move items or filter access - audited like the rest.
 thunderstore "$EPICLOOT_PKG" EpicLoot.dll EpicLoot.dll
 thunderstore "$PLANBUILD_PKG" PlanBuild.dll PlanBuild.dll
+thunderstore "$WIZARDRY_PKG" Wizardry.dll Wizardry.dll
+thunderstore "$DROPMORELOOT_PKG" DropMoreLoot.dll DropMoreLoot.dll
 
 # ---- 4. Fail with the missing path, not a wall of MSBuild reference errors --------------------
 required=(
@@ -153,6 +157,8 @@ required=(
   refs/mods/EpicLoot.dll
   refs/mods/PlanBuild.dll
   refs/mods/WardIsLove.dll
+  refs/mods/Wizardry.dll
+  refs/mods/DropMoreLoot.dll
 )
 for file in "${required[@]}"; do
   [ -f "$file" ] || { echo "missing reference: $file" >&2; exit 1; }
