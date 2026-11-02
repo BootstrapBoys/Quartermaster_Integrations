@@ -123,7 +123,9 @@ namespace Quartermaster_Integrations
 
                 if (_ready && QIDebugger.Enabled)
                 {
-                    QIDebugger.LogDebug("[Wizardry] Base-range storage enabled at Wizardry crafting tables.");
+                    QIDebugger.LogDebug(BridgePlugin.IntegrationOn(BridgePlugin.EnableWizardry)
+                        ? "[Wizardry] Base-range storage enabled at Wizardry crafting tables."
+                        : "[Wizardry] Installed but switched off under 2. Debug.");
                 }
             }
             catch (Exception ex)

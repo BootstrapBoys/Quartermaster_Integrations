@@ -294,7 +294,9 @@ namespace Quartermaster_Integrations
                 $"AAA: {AAACraftingIntegration.IsReady}, " +
                 $"ExtraSlots: {ExtraSlotsIntegration.IsReady}, " +
                 $"Backpacks: {AdventureBackpacksIntegration.IsReady}, " +
-                $"MLUI: {MLUIIntegration.IsReady}");
+                $"MLUI: {MLUIIntegration.IsReady}, " +
+                $"Wizardry: {WizardryIntegration.IsReady}, " +
+                $"DropMoreLoot: {DropMoreLootIntegration.IsReady}");
 
             LogDebug(
                 "[QM] Bindings: " +

@@ -90,9 +90,22 @@ namespace Quartermaster_Integrations
 
                 if (QIDebugger.Enabled)
                 {
-                    QIDebugger.LogDebug(IsReady
-                        ? $"[EpicLoot] Registered inventory provider '{ProviderId}' (storage counts, item removal, no save handler)."
-                        : $"[EpicLoot] API rejected inventory provider '{ProviderId}'.");
+                    if (!_ready)
+                    {
+                        QIDebugger.LogDebug($"[EpicLoot] API rejected inventory provider '{ProviderId}'.");
+                    }
+                    else if (BridgePlugin.IntegrationOn(BridgePlugin.EnableEpicLoot))
+                    {
+                        QIDebugger.LogDebug(
+                            $"[EpicLoot] Registered inventory provider '{ProviderId}' " +
+                            "(storage counts, item removal, no save handler).");
+                    }
+                    else
+                    {
+                        QIDebugger.LogDebug(
+                            $"[EpicLoot] Provider '{ProviderId}' registered but inactive: " +
+                            "EnableEpicLoot is off under 2. Debug.");
+                    }
                 }
             }
             catch (Exception ex)
