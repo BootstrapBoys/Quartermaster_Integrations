@@ -101,6 +101,7 @@ namespace Quartermaster_Integrations
 
         /// <summary>WardIsLove only: use the ward's radius as the crafting/storage range while inside it.</summary>
         public static ConfigEntry<bool> WardHostRange;
+        public static ConfigEntry<bool> WardPermittedSkipsOwnership;
 
         /// <summary>DropMoreLoot only: let its stack multiplier win instead of MaximumStackSize.</summary>
         public static ConfigEntry<bool> DeferToDropMoreLootStacks;
@@ -279,6 +280,17 @@ namespace Quartermaster_Integrations
                 "a craft may pull from - the ward bubble and your storage range become the same thing. " +
                 "Outside a ward nothing changes. Turn this off to always use Quartermaster's CraftRange.");
 
+            WardPermittedSkipsOwnership = Config.Bind(
+                "4. Patches",
+                "WardPermittedSkipsOwnership",
+                true,
+                "WardIsLove only. Quartermaster asks a container's owner to hand the ZDO over, and claims " +
+                "it after three unanswered requests - in a shared base a permitted visitor can end up " +
+                "owning the ward owner's chests. With this on, containers inside a ward you are permitted " +
+                "on skip that request entirely: counts still read from the ZDO, but deposits and machine " +
+                "collection still need real ownership.");
+
+
             ForgetRemovesEntry = Config.Bind(
                 "4. Patches",
                 "ForgetRemovesEntry",
@@ -319,6 +331,7 @@ namespace Quartermaster_Integrations
             RoutingDiagnostics.Initialize(_harmony);
             ForgetOverride.Initialize(_harmony);
             StackCrafterPatch.Initialize(_harmony);
+            WardOwnershipSkip.Initialize(_harmony);
 
             // Soft-dependency integrations set up their own patches; container-content invalidation
             // comes from Inventory.Changed (Container.Load ends in Inventory.Load, which calls

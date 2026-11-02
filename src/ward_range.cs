@@ -437,6 +437,19 @@ namespace Quartermaster_Integrations
             return inside;
         }
 
+        /// <summary>
+        /// True only when the position lies inside an enabled WardIsLove ward and that ward permits
+        /// the player. A position with no ward over it is not "permitted", it is simply unwatched -
+        /// callers use this to decide whether a ward, rather than ownership, should govern the object.
+        /// </summary>
+        public static bool InsidePermittedWard(Player player, Vector3 position)
+        {
+            if (player == null || !WardIsLoveIntegration.IsReady) return false;
+            if (!InsideAny(AllWards(), position)) return false;
+
+            return WardIsLoveIntegration.PermittedAt(player, position);
+        }
+
         private static bool InsideAny(List<Bubble> wards, Vector3 position)
         {
             for (int i = 0; i < wards.Count; i++)

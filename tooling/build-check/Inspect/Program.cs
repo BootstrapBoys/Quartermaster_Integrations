@@ -139,6 +139,8 @@ internal static class Program
         Field(qm, "Quartermaster.Plugin", "Range", "ConfigEntry`1", true);
 
         // ---- WardIsLove host range: every Quartermaster/WIL member the filter relies on ----------
+        Method(qm, "Quartermaster.ChestOwnership", "Request",
+            new[] { "ZNetView", "String", "Boolean" }, "Boolean", true);
         Method(qm, "Quartermaster.BaseNetwork", "Contains", new[] { "Vector3" }, "Boolean", false);
         Method(qm, "Quartermaster.BaseNetwork", "CanTransfer", new[] { "Vector3", "Vector3" }, "Boolean", false);
         Field(qm, "Quartermaster.BaseNetwork", "Hubs", "List`1", false);

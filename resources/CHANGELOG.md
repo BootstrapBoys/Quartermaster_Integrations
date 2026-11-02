@@ -8,6 +8,10 @@ Every version that gets built is listed here, newest first — including builds 
 
 ## [2.7.5] - 2026-11-02
 
+### Added
+
+* **Ward-permitted containers keep their owner.** Quartermaster requests ownership of every chest it reads and claims it after three unanswered requests, which in a shared base lets a permitted visitor take the ward owner's chests. `WardPermittedSkipsOwnership` (default on) makes containers inside a ward you are permitted on skip that handshake entirely; counts still read from the ZDO, while deposits and machine collection still require real ownership.
+
 ### Removed
 
 * **The Wizardry integration is gone.** Wizardry's wizard table, arcane forge, weaving loom and potion cauldron already pull from Quartermaster storage through the normal `CraftRange`, with no special handling - verified in game with the integration switched off. Its switch under 2. Debug is gone with it; nothing else changes.

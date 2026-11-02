@@ -120,6 +120,30 @@ namespace Quartermaster_Integrations
         /// True when WardIsLove (if present) allows this player to use the container. Always true
         /// when WardIsLove is absent, so callers do not need to branch.
         /// </summary>
+        /// <summary>
+        /// WardIsLove's own access test at a position: true when the point is permitted, or when no
+        /// ward governs it. Used for things that only have a ZNetView position, not a Container.
+        /// </summary>
+        public static bool PermittedAt(Player player, Vector3 position)
+        {
+            if (!IsReady || player == null || _checkAccess == null) return true;
+
+            try
+            {
+                return _checkAccess(player.GetPlayerID(), position, 0f, false);
+            }
+            catch (Exception ex)
+            {
+                if (Time.time - _lastErrorTime > 10f)
+                {
+                    _lastErrorTime = Time.time;
+                    QIDebugger.LogError("[WardIsLove] CheckAccess failed; position is treated as permitted", ex);
+                }
+
+                return true;
+            }
+        }
+
         public static bool IsPermitted(Player player, Container container)
         {
             if (!IsReady || player == null || container == null) return true;
