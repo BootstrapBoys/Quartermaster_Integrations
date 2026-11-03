@@ -139,6 +139,8 @@ internal static class Program
         Field(qm, "Quartermaster.Plugin", "Range", "ConfigEntry`1", true);
 
         // ---- WardIsLove host range: every Quartermaster/WIL member the filter relies on ----------
+        Method(vh, "InventoryGui", "DoCrafting", new[] { "Player" }, "Void", false);
+        Method(vh, "InventoryGui", "UpdateCraftingPanel", new[] { "Boolean" }, "Void", false);
         Method(qm, "Quartermaster.ChestOwnership", "Request",
             new[] { "ZNetView", "String", "Boolean" }, "Boolean", true);
         Method(qm, "Quartermaster.BaseNetwork", "Contains", new[] { "Vector3" }, "Boolean", false);

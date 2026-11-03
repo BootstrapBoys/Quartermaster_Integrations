@@ -122,6 +122,7 @@ Set `DebugMode = true` under `2. Debug` and the mod writes `BepInEx/BSBLogs/Quar
 | `[WardOwnership] WardOwnership = …` | the active mode at startup (debug only) |
 | `[WardOwnership] 'container' is in a permitted ward - leaving its owner alone` | a container skipped Quartermaster's ownership request (one line per container per 10 s, debug only) |
 | `[DropMoreLoot] Stack sizes defer to DropMoreLoot …` | startup line naming the multiplier in charge and the toggle state |
+| `[Craft] Recipe list repaints after each craft.` | the recipe list is refreshed once a craft finishes, so it cannot keep a stale "can't afford" tint (debug only) |
 | `[DropMoreLoot] Ledger stack tab: N control(s) disabled, toggle now reads …` | the stack tab was adjusted for the deferral (debug only) |
 
 ---

@@ -347,6 +347,7 @@ namespace Quartermaster_Integrations
             RoutingDiagnostics.Initialize(_harmony);
             ForgetOverride.Initialize(_harmony);
             StackCrafterPatch.Initialize(_harmony);
+            CraftRepaintPatch.Initialize(_harmony);
             WardOwnershipSkip.Initialize(_harmony);
 
             // Soft-dependency integrations set up their own patches; container-content invalidation
@@ -936,6 +937,8 @@ namespace Quartermaster_Integrations
         {
             if (!BridgePlugin.Enabled) return;
             if (__instance == null || player == null || !InventoryGui.IsVisible()) return;
+
+            CraftRepaintPatch.FlushIfIdle(__instance, GetCraftTimer(__instance));
 
             (Recipe recipe, ItemDrop.ItemData upgradeItem) = GetSelectedRecipeData(__instance);
             if (recipe == null || __instance.m_craftButton == null || GetCraftTimer(__instance) >= 0f) return;
