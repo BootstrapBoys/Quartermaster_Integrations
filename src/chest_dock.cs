@@ -15,7 +15,8 @@ namespace Quartermaster_Integrations
     ///    or its ZDO is not ours to write, so any settings would be silently dropped.
     ///  * "Sort Chest" still sorts any chest Quartermaster can reach but refuses because we do not own
     ///    it. Quartermaster normally hands those to its shared-chest handshake, which needs the owner
-    ///    present; here the sort runs directly instead.
+    ///    present; here the chest is claimed (exactly what vanilla does when a player opens it) and then
+    ///    sorted, so the change carries our owner revision and sticks.
     ///
     /// Chests that are in use by another player are never forced - that is Quartermaster's call.
     /// </summary>
@@ -134,13 +135,25 @@ namespace Quartermaster_Integrations
                 Inventory inventory = c.GetInventory();
                 if (inventory == null) return true;
 
+                // Ownership is a revision race the server arbitrates: claiming bumps our revision, the
+                // server keeps the highest, and vanilla does the same the moment a player opens a chest.
+                // Claiming first is what makes the sort stick while the current owner is online but away.
+                ZNetView view = View(c);
+                bool claimed = false;
+                if (view != null && !view.IsOwner())
+                {
+                    view.ClaimOwnership();
+                    claimed = view.IsOwner();
+                }
+
                 _stackWithin.Invoke(null, new object[] { inventory });
                 _sortInventory.Invoke(null, new object[] { inventory, false, false });
 
                 if (QIDebugger.Enabled)
                 {
                     QIDebugger.LogDebug(
-                        $"[ChestDock] Sorted '{ContainerRegistryName(c)}' even though it is not ours to write.");
+                        $"[ChestDock] Sorted '{ContainerRegistryName(c)}' even though it is not ours to write" +
+                        (claimed ? " (claimed it first)." : "."));
                 }
 
                 return false;   // Quartermaster's own handler would have bailed out
