@@ -5,6 +5,21 @@ using UnityEngine;
 
 namespace Quartermaster_Integrations
 {
+    /// <summary>How far Quartermaster may go to obtain write access to a permitted ward's containers.</summary>
+    public enum WardOwnershipMode
+    {
+        /// <summary>Never request or claim: the ward owner keeps every chest, and writes from a
+        /// permitted visitor fail with Quartermaster's own "not locally available" message.</summary>
+        Never,
+
+        /// <summary>Skip while the recorded owner is connected; if that owner is not among the
+        /// connected peers, let Quartermaster claim, so deposits and machine collection work.</summary>
+        IfOwnerOffline,
+
+        /// <summary>Quartermaster's normal request/claim, even inside a ward you are permitted on.</summary>
+        Always
+    }
+
     /// <summary>
     /// Stops Quartermaster from taking ownership of containers that sit in a WardIsLove ward the
     /// player is permitted on.
@@ -52,10 +67,10 @@ namespace Quartermaster_Integrations
                 if (QIDebugger.Enabled)
                 {
                     QIDebugger.LogDebug(
-                        "[WardOwnership] Ward-permitted containers " +
-                        (BridgePlugin.WardPermittedSkipsOwnership != null && BridgePlugin.WardPermittedSkipsOwnership.Value
-                            ? "skip Quartermaster's ownership request."
-                            : "still go through Quartermaster's ownership request."));
+                        "[WardOwnership] WardOwnership = " +
+                        (BridgePlugin.WardOwnership != null ? BridgePlugin.WardOwnership.Value.ToString() : "unbound") +
+                        " (Never: owner keeps every chest; IfOwnerOffline: claim only when that owner is away; " +
+                        "Always: Quartermaster's normal request).");
                 }
             }
             catch (Exception ex)
@@ -67,7 +82,11 @@ namespace Quartermaster_Integrations
         /// <summary>Returns false to skip the request/claim, reporting the container as settled.</summary>
         public static bool Request_Prefix(ZNetView view, ref bool __result)
         {
-            if (BridgePlugin.WardPermittedSkipsOwnership == null || !BridgePlugin.WardPermittedSkipsOwnership.Value) return true;
+            WardOwnershipMode mode = BridgePlugin.WardOwnership != null
+                ? BridgePlugin.WardOwnership.Value
+                : WardOwnershipMode.Never;
+
+            if (mode == WardOwnershipMode.Always) return true;
             if (view == null || !view.IsValid() || view.IsOwner()) return true;
 
             Player player = Player.m_localPlayer;
@@ -77,6 +96,11 @@ namespace Quartermaster_Integrations
             {
                 Vector3 position = view.transform.position;
                 if (!WardHostRange.InsidePermittedWard(player, position)) return true;
+
+                // Owner unreachable: let Quartermaster run its normal request, which ends in a claim.
+                // That is the only server-sanctioned way to write to a container we do not own, so it
+                // is what makes deposits and machine collection work while the ward owner is away.
+                if (mode == WardOwnershipMode.IfOwnerOffline && OwnerOffline(view)) return true;
 
                 __result = true;
 
@@ -97,6 +121,27 @@ namespace Quartermaster_Integrations
                 QIDebugger.LogDebug("[WardOwnership] Could not evaluate the ward; letting Quartermaster request", ex);
                 return true;
             }
+        }
+
+        /// <summary>
+        /// True when the ZDO's owner is not one of the connected peers (or is unset) - the case where a
+        /// claim is the only way to write and cannot take a chest from anyone who is present.
+        /// </summary>
+        private static bool OwnerOffline(ZNetView view)
+        {
+            long owner = view.GetZDO().GetOwner();
+            if (owner == 0L) return true;
+            if (owner == ZDOMan.GetSessionID()) return false;
+
+            ZNet net = ZNet.instance;
+            if (net == null) return true;
+
+            foreach (ZNetPeer peer in net.GetPeers())
+            {
+                if (peer != null && peer.m_uid == owner) return false;
+            }
+
+            return true;
         }
     }
 }

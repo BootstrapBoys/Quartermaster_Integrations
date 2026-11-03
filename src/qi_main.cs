@@ -78,7 +78,7 @@ namespace Quartermaster_Integrations
         //
         // Versioning: bug fixes bump the patch digit (2.4.2 -> 2.4.3); adding an integration bumps the
         // minor and resets the patch (2.4.3 -> 2.5.0). Every bump gets a changelog entry.
-        public const string PluginVersion = "2.7.5";
+        public const string PluginVersion = "2.7.6";
 
         public const string QuartermasterGUID = "local.valheim.quartermaster";
         public const string MLUIGUID = "shudnal.MyLittleUI";
@@ -101,7 +101,7 @@ namespace Quartermaster_Integrations
 
         /// <summary>WardIsLove only: use the ward's radius as the crafting/storage range while inside it.</summary>
         public static ConfigEntry<bool> WardHostRange;
-        public static ConfigEntry<bool> WardPermittedSkipsOwnership;
+        public static ConfigEntry<WardOwnershipMode> WardOwnership;
 
         /// <summary>DropMoreLoot only: let its stack multiplier win instead of MaximumStackSize.</summary>
         public static ConfigEntry<bool> DeferToDropMoreLootStacks;
@@ -271,24 +271,7 @@ namespace Quartermaster_Integrations
                 "stack tab says so. Turn this off to keep Quartermaster's stack override, which replaces " +
                 "DropMoreLoot's multiplied value.");
 
-            WardHostRange = Config.Bind(
-                "4. Patches",
-                "WardHostRange",
-                true,
-                "WardIsLove only. While you are inside one of its wards, that ward's radius replaces " +
-                "Quartermaster's CraftRange for the crafting counts, the max-craft number and which chests " +
-                "a craft may pull from - the ward bubble and your storage range become the same thing. " +
-                "Outside a ward nothing changes. Turn this off to always use Quartermaster's CraftRange.");
 
-            WardPermittedSkipsOwnership = Config.Bind(
-                "4. Patches",
-                "WardPermittedSkipsOwnership",
-                true,
-                "WardIsLove only. Quartermaster asks a container's owner to hand the ZDO over, and claims " +
-                "it after three unanswered requests - in a shared base a permitted visitor can end up " +
-                "owning the ward owner's chests. With this on, containers inside a ward you are permitted " +
-                "on skip that request entirely: counts still read from the ZDO, but deposits and machine " +
-                "collection still need real ownership.");
 
 
             ForgetRemovesEntry = Config.Bind(
@@ -309,6 +292,27 @@ namespace Quartermaster_Integrations
                 "crafter entirely. With this on, materials merge when the crafter is the only difference: " +
                 "same item, quality, variant, world level, durability, cheat flag and custom data. Gear, " +
                 "enchanted and world-levelled items keep Quartermaster's rule.");
+
+            WardHostRange = Config.Bind(
+                "5. Ward",
+                "WardHostRange",
+                true,
+                "WardIsLove only. While you are inside one of its wards, that ward's radius replaces " +
+                "Quartermaster's CraftRange for the crafting counts, the max-craft number and which chests " +
+                "a craft may pull from - the ward bubble and your storage range become the same thing. " +
+                "Outside a ward nothing changes. Turn this off to always use Quartermaster's CraftRange.");
+
+            WardOwnership = Config.Bind(
+                "5. Ward",
+                "WardOwnership",
+                WardOwnershipMode.IfOwnerOffline,
+                "WardIsLove only. Quartermaster asks a container's owner to hand the ZDO over and claims it " +
+                "after three unanswered requests, so a permitted visitor can take the ward owner's chests. " +
+                "Never = never request or claim (the owner keeps every chest, but deposits and machine " +
+                "collection by a visitor fail); IfOwnerOffline = skip while the recorded owner is connected, " +
+                "claim only when that owner is not online, so deposits and machine output still work; " +
+                "Always = Quartermaster's normal request/claim everywhere.");
+
             UpdateCachedColors();
             SufficientResourceColor.SettingChanged += (_, __) => UpdateCachedColors();
 

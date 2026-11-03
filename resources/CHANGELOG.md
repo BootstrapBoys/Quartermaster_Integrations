@@ -6,6 +6,14 @@ Every version that gets built is listed here, newest first — including builds 
 
 ---
 
+## [2.7.6] - 2026-11-03
+
+### Changed
+
+* **Ward ownership is now a three-way setting, under its own `5. Ward` category.** `WardOwnership` replaces the old skip switch: `Never` leaves every chest with the ward owner (deposits and machine collection by a visitor fail), `IfOwnerOffline` (default) skips only while the recorded owner is connected and lets Quartermaster claim when that owner is away, so deposits and machine output keep working, and `Always` is Quartermaster's normal request/claim. `WardHostRange` moved into the same category.
+
+---
+
 ## [2.7.5] - 2026-11-02
 
 ### Added
