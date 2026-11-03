@@ -14,6 +14,10 @@ Every version that gets built is listed here, newest first — including builds 
 
 ### Added
 
+* **Chest dock actions now match what the chest allows.** `Chest Config` is hidden on chests your character cannot write - Quartermaster used to offer it and then silently drop the settings - and `Sort Chest` now sorts any chest Quartermaster can reach but does not own, rather than handing it to the shared-chest handshake that needs the owner online. Chests another player has open are left to Quartermaster. Controlled by `AnyChestDock` (4. Patches, default on).
+
+### Added
+
 * **Sorting your inventory now merges duplicate stacks.** Quartermaster's sort only rearranges slots, and its merge routine runs for chests but never for pockets, so two stacks of the same iron sat untouched however often you sorted. `MergePocketsOnSort` (4. Patches, default on) combines identical pocket stacks first - honouring `IgnoreCrafter` and `IgnoredStackTags`, skipping equipped items - and then lets Quartermaster arrange the compacted result.
 
 ### Fixed

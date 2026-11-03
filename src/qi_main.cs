@@ -109,6 +109,7 @@ namespace Quartermaster_Integrations
         public static ConfigEntry<bool> IgnoreCrafter;
         public static ConfigEntry<string> IgnoredStackTags;
         public static ConfigEntry<bool> MergePocketsOnSort;
+        public static ConfigEntry<bool> AnyChestDock;
         public static ConfigEntry<bool> EnableAAABuildMenu;
         public static ConfigEntry<bool> EnableAAACrafting;
         public static ConfigEntry<bool> EnableMyLittleUI;
@@ -315,6 +316,17 @@ namespace Quartermaster_Integrations
                 "IgnoreCrafter and IgnoredStackTags), equipped items are left alone, then Quartermaster " +
                 "arranges the result.");
 
+            AnyChestDock = Config.Bind(
+                "4. Patches",
+                "AnyChestDock",
+                true,
+                "Quartermaster only. Two fixes to its chest dock, which offers actions it cannot always " +
+                "deliver: 'Chest Config' is hidden on chests the player cannot write (otherwise the " +
+                "settings are silently dropped), and 'Sort Chest' also works on chests Quartermaster can " +
+                "reach but does not own - it normally hands those to a handshake that needs the owner " +
+                "present. Chests another player has open are left to Quartermaster.");
+
+
 
 
             WardHostRange = Config.Bind(
@@ -361,6 +373,7 @@ namespace Quartermaster_Integrations
             StackCrafterPatch.Initialize(_harmony);
             CraftRepaintPatch.Initialize(_harmony);
             PocketMerge.Initialize(_harmony);
+            ChestDockPatch.Initialize(_harmony);
             WardOwnershipSkip.Initialize(_harmony);
 
             // Soft-dependency integrations set up their own patches; container-content invalidation

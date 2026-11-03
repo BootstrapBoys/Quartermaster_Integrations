@@ -76,6 +76,14 @@ internal static class Program
         // ---- Quartermaster 0.1.65 (pack runs 0.1.66; nearest published build) -------------------
         var qm = Load(mlc, Path.Combine(Mods, "Quartermaster.dll"));
         Method(qm, "Quartermaster.WarehouseService", "CountAvailableNearPlayer", new[] { "String", "Int32", "Boolean" }, "Int32", true);
+        Method(qm, "Quartermaster.ChestUi", "LayoutActions", Array.Empty<string>(), "Void", true);
+        Method(qm, "Quartermaster.ChestUi", "SortChest", Array.Empty<string>(), "Void", true);
+        Method(qm, "Quartermaster.ContainerRegistry", "Accessible",
+            new[] { "Container" }, "Boolean", true);
+        Method(qm, "Quartermaster.ContainerRegistry", "IsUsable",
+            new[] { "Container", "Boolean" }, "Boolean", true);
+        Method(qm, "Quartermaster.NativeStorageAccess", "CanWrite",
+            new[] { "ZNetView" }, "Boolean", true);
         Method(qm, "Quartermaster.WarehouseService", "SortInventory", new[] { "Inventory", "Boolean", "Boolean" }, "Boolean", true);
         Method(qm, "Quartermaster.WarehouseService", "StoreAllInOpenChest", new[] { "Player", "Container" }, "Int32", true);
         Method(qm, "Quartermaster.ExternalSlotCompatibility", "IsProtectedPlayerSlot", new[] { "Int32", "Int32" }, "Boolean", true);
