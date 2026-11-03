@@ -26,6 +26,10 @@ Every version that gets built is listed here, newest first — including builds 
 
 ### Fixed
 
+* **Permitted-ward chests stayed unwritable after a restart.** `WardOwnership = IfOwnerOffline` skipped any container whose recorded owner was a connected peer - but on a dedicated server that is the server session, which owns everything it loads and is always connected. Every chest in the ward was therefore skipped forever, so deposits, machine collection and sorting refused with Quartermaster's "close its lid and check access" message. The server session no longer counts as a present owner; a real connected player still does. The routing diagnostic now prints `owner=`, `inUse=` and `zdoInUse=` so an ownership refusal is not mistaken for a chest left open.
+
+### Fixed
+
 * **Mailboxes no longer stick on "Checking queued mail" after a restart.** A mailbox stores its outgoing parcel by ZDO id and Quartermaster reports that status whenever the parcel cannot be found - but it never clears the link, so a send interrupted between saves left the mailbox reporting queued mail forever and refusing new work. `MailStaleLinkCleanup` (4. Patches, default on) clears a link that has pointed at a missing parcel for a few seconds, claiming the mailbox first when it is within 30 m, the same claim vanilla makes when you open a chest.
 
 ### Fixed

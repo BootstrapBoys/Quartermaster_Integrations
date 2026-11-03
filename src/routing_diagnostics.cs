@@ -160,7 +160,7 @@ namespace Quartermaster_Integrations
                         if (accept) acceptsOk++;
                         if (writable) writableOk++;
 
-                        string line = $"{chest.m_name}: transfer={transfer} accepts={accept} writable={writable}";
+                        string line = $"{chest.m_name}: transfer={transfer} accepts={accept} writable={writable}{Why(chest)}";
 
                         if (transfer && accept && !writable && blocked.Count < 3) blocked.Add(line);
                         else if (samples.Count < 4) samples.Add(line);
@@ -241,6 +241,48 @@ namespace Quartermaster_Integrations
                     if (++sampled >= 3) break;
                 }
             }
+        }
+
+        /// <summary>
+        /// Names the reason Writable() said no: who owns the ZDO, and whether the game thinks the lid
+        /// is open. "writable=False owner=server inUse=False" is an ownership refusal, not a busy chest.
+        /// </summary>
+        private static string Why(Container chest)
+        {
+            try
+            {
+                ZNetView view = chest.m_rootObjectOverride != null
+                    ? chest.m_rootObjectOverride
+                    : chest.GetComponent<ZNetView>();
+
+                if (view == null || !view.IsValid()) return " view=invalid";
+
+                ZDO zdo = view.GetZDO();
+                long owner = zdo.GetOwner();
+                string who = view.IsOwner() ? "self"
+                    : owner == 0L ? "none"
+                    : ServerOwns(owner) ? "server"
+                    : "peer:" + owner;
+
+                return $" owner={who} inUse={chest.IsInUse()} zdoInUse={zdo.GetInt("inUse", 0)}";
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        private static bool ServerOwns(long uid)
+        {
+            ZNet net = ZNet.instance;
+            if (net == null) return false;
+
+            foreach (ZNetPeer peer in net.GetPeers())
+            {
+                if (peer != null && peer.m_uid == uid && peer.m_server) return true;
+            }
+
+            return false;
         }
 
         private static List<string> Remembered(object settings, FieldInfo field = null)

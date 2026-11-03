@@ -41,7 +41,7 @@ namespace Quartermaster_Integrations
         private static readonly System.Collections.Generic.Dictionary<int, float> LastLogged =
             new System.Collections.Generic.Dictionary<int, float>();
 
-        private const float Throttle = 10f;
+        private const float Throttle = 60f;
 
         public static void Initialize(Harmony harmony)
         {
@@ -110,8 +110,8 @@ namespace Quartermaster_Integrations
                 {
                     LastLogged[id] = now;
                     QIDebugger.LogDebug(
-                        $"[WardOwnership] '{view.name}' is in a permitted ward - leaving its owner alone " +
-                        "(no request, no claim).");
+                        $"[WardOwnership] '{view.name}' is in a permitted ward and its owner (session " +
+                        $"{view.GetZDO().GetOwner()}) is connected - leaving it alone (no request, no claim).");
                 }
 
                 return false;
@@ -138,7 +138,14 @@ namespace Quartermaster_Integrations
 
             foreach (ZNetPeer peer in net.GetPeers())
             {
-                if (peer != null && peer.m_uid == owner) return false;
+                if (peer == null || peer.m_uid != owner) continue;
+
+                // The dedicated server owns anything it created or loaded without a player behind it.
+                // It is always "connected", but no player is holding the chest, so a claim cannot take
+                // it from anyone present - which is exactly the case that must be allowed.
+                if (peer.m_server) continue;
+
+                return false;
             }
 
             return true;
