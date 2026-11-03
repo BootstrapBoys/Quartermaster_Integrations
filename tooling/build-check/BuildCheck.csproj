@@ -34,6 +34,7 @@
     <Compile Include="../../src/ward_range.cs" Link="mod/ward_range.cs" />
     <Compile Include="../../src/ward_ownership.cs" Link="mod/ward_ownership.cs" />
     <Compile Include="../../src/craft_repaint.cs" Link="mod/craft_repaint.cs" />
+    <Compile Include="../../src/pocket_merge.cs" Link="mod/pocket_merge.cs" />
     <Compile Include="../../src/dropmoreloot_integration.cs" Link="mod/dropmoreloot_integration.cs" />
     <Compile Include="../../src/wizardry_integration.cs" Link="mod/wizardry_integration.cs" />
     <Compile Include="../../src/stack_diagnostics.cs" Link="mod/stack_diagnostics.cs" />

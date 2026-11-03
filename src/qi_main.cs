@@ -108,6 +108,7 @@ namespace Quartermaster_Integrations
         public static ConfigEntry<bool> ForgetRemovesEntry;
         public static ConfigEntry<bool> IgnoreCrafter;
         public static ConfigEntry<string> IgnoredStackTags;
+        public static ConfigEntry<bool> MergePocketsOnSort;
         public static ConfigEntry<bool> EnableAAABuildMenu;
         public static ConfigEntry<bool> EnableAAACrafting;
         public static ConfigEntry<bool> EnableMyLittleUI;
@@ -304,6 +305,17 @@ namespace Quartermaster_Integrations
                 "provenance stamp some admin panels write onto items, which otherwise keeps stamped and " +
                 "unstamped materials apart.");
 
+            MergePocketsOnSort = Config.Bind(
+                "4. Patches",
+                "MergePocketsOnSort",
+                true,
+                "Quartermaster only. Its inventory sort only rearranges slots, and its merge routine runs " +
+                "for chests but never for your pockets - so sorting your inventory leaves two stacks of the " +
+                "same item separate. With this on, identical pocket stacks are combined first (honouring " +
+                "IgnoreCrafter and IgnoredStackTags), equipped items are left alone, then Quartermaster " +
+                "arranges the result.");
+
+
 
             WardHostRange = Config.Bind(
                 "5. Ward",
@@ -348,6 +360,7 @@ namespace Quartermaster_Integrations
             ForgetOverride.Initialize(_harmony);
             StackCrafterPatch.Initialize(_harmony);
             CraftRepaintPatch.Initialize(_harmony);
+            PocketMerge.Initialize(_harmony);
             WardOwnershipSkip.Initialize(_harmony);
 
             // Soft-dependency integrations set up their own patches; container-content invalidation

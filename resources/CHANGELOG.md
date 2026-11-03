@@ -12,6 +12,10 @@ Every version that gets built is listed here, newest first — including builds 
 
 * **Stamped materials stack again.** Some admin panels stamp items with an `ap_prov` provenance entry, which made stamped and unstamped fine wood (and anything else stamped) refuse to merge. `IgnoredStackTags` (4. Patches, default `ap_prov`) lists custom-data keys to ignore for stackable items; every other entry, quality, world level and durability must still match.
 
+### Added
+
+* **Sorting your inventory now merges duplicate stacks.** Quartermaster's sort only rearranges slots, and its merge routine runs for chests but never for pockets, so two stacks of the same iron sat untouched however often you sorted. `MergePocketsOnSort` (4. Patches, default on) combines identical pocket stacks first - honouring `IgnoreCrafter` and `IgnoredStackTags`, skipping equipped items - and then lets Quartermaster arrange the compacted result.
+
 ### Fixed
 
 * **The recipe list no longer stays dimmed after a craft.** Crafting consumes materials, but the list was only painted when it was built, so every recipe could keep looking unaffordable while the craft button - which reads live counts - still worked. The panel now repaints once each craft finishes, with the count cache invalidated first.

@@ -162,6 +162,8 @@ internal static class Program
         Method(qm, "Quartermaster.FurnitureAssignment", "Accepts",
             new[] { "Container", "ItemData" }, "Boolean", true);
         Method(qm, "Quartermaster.InventoryTransfers", "ItemId", new[] { "ItemData" }, "String", true);
+        Method(qm, "Quartermaster.WarehouseService", "SortInventory",
+            new[] { "Inventory", "Boolean", "Boolean" }, "Boolean", true);
         Method(qm, "Quartermaster.InventoryTransfers", "StackWithin",
             new[] { "Inventory" }, "Void", true);
         Field(qm, "Quartermaster.ChestSettings", "Remembered", "List`1", false);
