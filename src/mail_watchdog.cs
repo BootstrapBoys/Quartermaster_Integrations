@@ -28,6 +28,9 @@ namespace Quartermaster_Integrations
         /// <summary>How long a link may dangle before it is treated as stale. Rig tests set this to 0.</summary>
         internal static float GraceSeconds = 10f;
 
+        /// <summary>A mailbox this close to the player may be claimed for the repair.</summary>
+        internal const float ClaimRange = 30f;
+
         private static MethodInfo _isMailbox;
         private static FieldInfo _all;
         private static readonly Dictionary<ZDOID, float> FirstSeen = new Dictionary<ZDOID, float>();
@@ -166,6 +169,26 @@ namespace Quartermaster_Integrations
             {
                 next[zdo.m_uid] = first;
                 return false;
+            }
+
+            if (!view.IsOwner())
+            {
+                // The ward patch stops Quartermaster asking for ownership; it never grants it. So repair
+                // the same way vanilla does when a player opens a chest: claim, then write. Scoped to
+                // mailboxes near the player so a sweep never steals one from across the map.
+                Player player = Player.m_localPlayer;
+                float range = ClaimRange * ClaimRange;
+
+                if (player != null && !player.IsDead() &&
+                    (player.transform.position - mailbox.transform.position).sqrMagnitude <= range)
+                {
+                    view.ClaimOwnership();
+
+                    if (view.IsOwner() && QIDebugger.Enabled)
+                    {
+                        QIDebugger.LogDebug($"[Mail] Claimed '{Name(mailbox)}' to repair its queued-mail link.");
+                    }
+                }
             }
 
             if (!view.IsOwner())
