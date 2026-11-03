@@ -26,7 +26,7 @@ Every version that gets built is listed here, newest first — including builds 
 
 ### Fixed
 
-* **Mailboxes no longer stick on "Checking queued mail" after a restart.** A mailbox stores its outgoing parcel by ZDO id and Quartermaster reports that status whenever the parcel cannot be found - but it never clears the link, so a send interrupted between saves left the mailbox reporting queued mail forever and refusing new work. `MailStaleLinkCleanup` (4. Patches, default on) clears a link that has pointed at a missing parcel for a few seconds, as long as the mailbox is yours to write.
+* **Mailboxes no longer stick on "Checking queued mail" after a restart.** A mailbox stores its outgoing parcel by ZDO id and Quartermaster reports that status whenever the parcel cannot be found - but it never clears the link, so a send interrupted between saves left the mailbox reporting queued mail forever and refusing new work. `MailStaleLinkCleanup` (4. Patches, default on) clears a link that has pointed at a missing parcel for a few seconds, claiming the mailbox first when it is within 30 m, the same claim vanilla makes when you open a chest.
 
 ### Fixed
 
