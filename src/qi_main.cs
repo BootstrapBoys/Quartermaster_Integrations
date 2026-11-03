@@ -107,6 +107,7 @@ namespace Quartermaster_Integrations
         public static ConfigEntry<bool> DeferToDropMoreLootStacks;
         public static ConfigEntry<bool> ForgetRemovesEntry;
         public static ConfigEntry<bool> IgnoreCrafter;
+        public static ConfigEntry<string> IgnoredStackTags;
         public static ConfigEntry<bool> EnableAAABuildMenu;
         public static ConfigEntry<bool> EnableAAACrafting;
         public static ConfigEntry<bool> EnableMyLittleUI;
@@ -292,6 +293,17 @@ namespace Quartermaster_Integrations
                 "crafter entirely. With this on, materials merge when the crafter is the only difference: " +
                 "same item, quality, variant, world level, durability, cheat flag and custom data. Gear, " +
                 "enchanted and world-levelled items keep Quartermaster's rule.");
+
+            IgnoredStackTags = Config.Bind(
+                "4. Patches",
+                "IgnoredStackTags",
+                "ap_prov",
+                "Quartermaster only. Comma-separated custom-data keys to ignore when deciding whether two " +
+                "stackable items are identical. Empty compares every entry. Only affects items that can " +
+                "stack; Epic Loot's enchant data is never a sensible entry here. Default 'ap_prov' is the " +
+                "provenance stamp some admin panels write onto items, which otherwise keeps stamped and " +
+                "unstamped materials apart.");
+
 
             WardHostRange = Config.Bind(
                 "5. Ward",

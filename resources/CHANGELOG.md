@@ -8,6 +8,10 @@ Every version that gets built is listed here, newest first — including builds 
 
 ## [2.7.6] - 2026-11-03
 
+### Added
+
+* **Stamped materials stack again.** Some admin panels stamp items with an `ap_prov` provenance entry, which made stamped and unstamped fine wood (and anything else stamped) refuse to merge. `IgnoredStackTags` (4. Patches, default `ap_prov`) lists custom-data keys to ignore for stackable items; every other entry, quality, world level and durability must still match.
+
 ### Changed
 
 * **Ward ownership is now a three-way setting, under its own `5. Ward` category.** `WardOwnership` replaces the old skip switch: `Never` leaves every chest with the ward owner (deposits and machine collection by a visitor fail), `IfOwnerOffline` (default) skips only while the recorded owner is connected and lets Quartermaster claim when that owner is away, so deposits and machine output keep working, and `Always` is Quartermaster's normal request/claim. `WardHostRange` moved into the same category.

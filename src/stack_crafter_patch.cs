@@ -10,10 +10,10 @@ namespace Quartermaster_Integrations
     /// will not stack with core wood you picked up. Vanilla does not care: Inventory.FindFreeStackItem
     /// compares name, quality and world level only. The extra rule is Quartermaster's own.
     ///
-    /// With IgnoreCrafter on, the comparison is repeated here without the crafter fields and the
-    /// merge runs when that is the only difference. Deliberately narrow: stackable items only, and the
-    /// quality, variant, world level, durability, cheat flag and custom data must all still match - so
-    /// gear, Epic Loot world levels and enchant data keep Quartermaster's rule untouched.
+    /// Two relaxations, both for stackable items only: IgnoreCrafter drops the crafter fields, and
+    /// IgnoredStackTags drops the named custom-data keys (provenance stamps and the like). Quality,
+    /// variant, world level, durability and every other custom-data entry must still match, so gear,
+    /// Epic Loot world levels and enchant data keep Quartermaster's rule untouched.
     /// </summary>
     public static class StackCrafterPatch
     {
@@ -65,23 +65,30 @@ namespace Quartermaster_Integrations
         /// </summary>
         public static bool Stackable_Prefix(ItemDrop.ItemData a, ItemDrop.ItemData b, ref bool __result)
         {
-            if (BridgePlugin.IgnoreCrafter == null || !BridgePlugin.IgnoreCrafter.Value) return true;
-            if (!Mergeable(a, b)) return true;
+            bool ignoreCrafter = BridgePlugin.IgnoreCrafter != null && BridgePlugin.IgnoreCrafter.Value;
+            if (!ignoreCrafter && IgnoredTags().Count == 0) return true;
+            if (!Mergeable(a, b, ignoreCrafter)) return true;
 
             __result = true;
 
             if (QIDebugger.Enabled)
             {
+                string why = ignoreCrafter ? "crafter" : "ignored tags";
                 QIDebugger.LogDebug(
                     $"[Stacks] merging '{a.m_shared.m_name}' x{a.m_stack} ({Crafter(a)}) with " +
-                    $"x{b.m_stack} ({Crafter(b)}): identical apart from the crafter");
+                    $"x{b.m_stack} ({Crafter(b)}): identical apart from the {why}");
             }
 
             return false;
         }
 
-        /// <summary>Mirrors Quartermaster's Stackable minus the crafter fields, and demands they differ.</summary>
-        private static bool Mergeable(ItemDrop.ItemData a, ItemDrop.ItemData b)
+        /// <summary>
+        /// Mirrors Quartermaster's Stackable, relaxing exactly the fields the settings allow: the
+        /// crafter when IgnoreCrafter is on, and any custom-data key listed in IgnoredStackTags.
+        /// Everything else must still match, and something must actually differ or Quartermaster's own
+        /// answer is left alone.
+        /// </summary>
+        private static bool Mergeable(ItemDrop.ItemData a, ItemDrop.ItemData b, bool ignoreCrafter)
         {
             if (a?.m_shared == null || b?.m_shared == null) return false;
             if (a.m_shared.m_maxStackSize <= 1) return false;
@@ -93,25 +100,53 @@ namespace Quartermaster_Integrations
             if (a.m_worldLevel != b.m_worldLevel) return false;
             if (a.m_cheated != b.m_cheated) return false;
             if ((a.m_shared.m_useDurability || b.m_shared.m_useDurability) && a.m_durability != b.m_durability) return false;
-            if (!SameCustomData(a.m_customData, b.m_customData)) return false;
 
-            return a.m_crafterID != b.m_crafterID || (a.m_crafterName ?? "") != (b.m_crafterName ?? "");
+            bool crafterSame = a.m_crafterID == b.m_crafterID && (a.m_crafterName ?? "") == (b.m_crafterName ?? "");
+
+            // SameCustomData ignores the configured tags; Strict compares every entry.
+            if (!SameCustomData(a.m_customData, b.m_customData, true)) return false;   // a real entry differs
+            if (!crafterSame && !ignoreCrafter) return false;
+            if (crafterSame && SameCustomData(a.m_customData, b.m_customData, false)) return false; // nothing to relax
+
+            return true;
         }
 
-        private static bool SameCustomData(Dictionary<string, string> left, Dictionary<string, string> right)
+        private static bool SameCustomData(Dictionary<string, string> left, Dictionary<string, string> right, bool ignoreTags)
         {
-            if ((left?.Count ?? 0) != (right?.Count ?? 0)) return false;
-            if (left == null) return true;
+            HashSet<string> ignored = ignoreTags ? IgnoredTags() : new HashSet<string>();
 
-            foreach (KeyValuePair<string, string> entry in left)
+            List<string> leftKeys = left == null ? new List<string>() : new List<string>(left.Keys);
+            List<string> rightKeys = right == null ? new List<string>() : new List<string>(right.Keys);
+
+            foreach (string key in rightKeys)
             {
-                if (right == null || !right.TryGetValue(entry.Key, out string value) || value != entry.Value)
-                {
-                    return false;
-                }
+                if (!ignored.Contains(key) && !leftKeys.Contains(key)) return false;
+            }
+
+            foreach (string key in leftKeys)
+            {
+                if (ignored.Contains(key)) continue;
+                if (right == null || !right.TryGetValue(key, out string value)) return false;
+                if (value != left[key]) return false;
             }
 
             return true;
+        }
+
+        /// <summary>Custom-data keys the user considers cosmetic (comma separated in the config).</summary>
+        private static HashSet<string> IgnoredTags()
+        {
+            HashSet<string> keys = new HashSet<string>(StringComparer.Ordinal);
+            string raw = BridgePlugin.IgnoredStackTags != null ? BridgePlugin.IgnoredStackTags.Value : null;
+            if (string.IsNullOrEmpty(raw)) return keys;
+
+            foreach (string part in raw.Split(','))
+            {
+                string key = part.Trim();
+                if (key.Length > 0) keys.Add(key);
+            }
+
+            return keys;
         }
 
         private static string ItemId(ItemDrop.ItemData item)
