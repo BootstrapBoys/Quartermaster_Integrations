@@ -42,6 +42,20 @@ namespace Quartermaster_Integrations
                 HarmonyPatchGuard.TryPatch(
                     harmony, stackable, "Quartermaster.InventoryTransfers.Stackable",
                     postfix: new HarmonyMethod(typeof(StackDiagnostics), nameof(Stackable_Postfix)));
+
+                // StackWithin calls Stackable for every pair, so a refusal it cannot merge always
+                // reaches the log above. This second line proves the pass ran at all and names what
+                // was left as separate stacks, even when the pair refused for a reason we cannot see.
+                System.Reflection.MethodInfo stackWithin = transfers == null
+                    ? null
+                    : AccessTools.Method(transfers, "StackWithin", new[] { typeof(Inventory) });
+
+                if (stackWithin != null)
+                {
+                    HarmonyPatchGuard.TryPatch(
+                        harmony, stackWithin, "Quartermaster.InventoryTransfers.StackWithin",
+                        postfix: new HarmonyMethod(typeof(StackDiagnostics), nameof(StackWithin_Postfix)));
+                }
             }
             catch (Exception ex)
             {
@@ -71,6 +85,39 @@ namespace Quartermaster_Integrations
             catch (Exception ex)
             {
                 QIDebugger.LogDebug("[Stacks] Could not describe a refused merge", ex);
+            }
+        }
+
+        /// <summary>
+        /// After Quartermaster stacks a chest, report every item that still occupies more than one
+        /// stack - the sort ran, and these are the names it could not merge.
+        /// </summary>
+        public static void StackWithin_Postfix(Inventory __0)
+        {
+            if (!QIDebugger.Enabled || __0 == null) return;
+
+            try
+            {
+                Dictionary<string, int> stacks = new Dictionary<string, int>(StringComparer.Ordinal);
+                foreach (ItemDrop.ItemData item in __0.GetAllItems())
+                {
+                    if (item?.m_shared == null) continue;
+                    stacks.TryGetValue(item.m_shared.m_name, out int count);
+                    stacks[item.m_shared.m_name] = count + 1;
+                }
+
+                float now = UnityEngine.Time.time;
+                foreach (KeyValuePair<string, int> pair in stacks)
+                {
+                    if (pair.Value < 2) continue;
+                    if (LastLogged.TryGetValue("sort:" + pair.Key, out float last) && now - last < Throttle) continue;
+                    LastLogged["sort:" + pair.Key] = now;
+                    QIDebugger.LogDebug($"[Stacks] after sorting, '{pair.Key}' still has {pair.Value} stacks");
+                }
+            }
+            catch (Exception ex)
+            {
+                QIDebugger.LogDebug("[Stacks] Could not summarise the sort", ex);
             }
         }
 
