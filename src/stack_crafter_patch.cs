@@ -10,14 +10,19 @@ namespace Quartermaster_Integrations
     /// will not stack with core wood you picked up. Vanilla does not care: Inventory.FindFreeStackItem
     /// compares name, quality and world level only. The extra rule is Quartermaster's own.
     ///
-    /// Two relaxations, both for stackable items only: IgnoreCrafter drops the crafter fields, and
-    /// IgnoredStackTags drops the named custom-data keys (provenance stamps and the like). Quality,
-    /// variant, world level, durability and every other custom-data entry must still match, so gear,
-    /// Epic Loot world levels and enchant data keep Quartermaster's rule untouched.
+    /// Three relaxations, all for stackable items only: IgnoreCrafter drops the crafter fields,
+    /// IgnoredStackTags drops the named custom-data keys (provenance stamps and the like), and
+    /// IgnoreEpicLootComponents drops Epic Loot's MagicItemComponent - which Epic Loot also stamps onto
+    /// materials, where it has no bearing on stacking. Quality, variant, world level, durability and
+    /// every other custom-data entry must still match, so gear, Epic Loot world levels and real enchant
+    /// data keep Quartermaster's rule untouched.
     /// </summary>
     public static class StackCrafterPatch
     {
         private static MethodInfo _itemId;
+
+        /// <summary>Epic Loot's enchant payload; meaningless on the materials it also stamps.</summary>
+        private const string EpicLootComponent = "randyknapp.mods.epicloot#EpicLoot.MagicItemComponent";
 
         public static void Initialize(Harmony harmony)
         {
@@ -66,7 +71,7 @@ namespace Quartermaster_Integrations
         public static bool Stackable_Prefix(ItemDrop.ItemData a, ItemDrop.ItemData b, ref bool __result)
         {
             bool ignoreCrafter = BridgePlugin.IgnoreCrafter != null && BridgePlugin.IgnoreCrafter.Value;
-            if (!ignoreCrafter && IgnoredTags().Count == 0) return true;
+            if (!ignoreCrafter && IgnoredTags().Count == 0 && !IgnoreComponents()) return true;
             if (!Mergeable(a, b, ignoreCrafter)) return true;
 
             __result = true;
@@ -114,6 +119,7 @@ namespace Quartermaster_Integrations
         private static bool SameCustomData(Dictionary<string, string> left, Dictionary<string, string> right, bool ignoreTags)
         {
             HashSet<string> ignored = ignoreTags ? IgnoredTags() : new HashSet<string>();
+            if (ignoreTags && IgnoreComponents()) ignored.Add(EpicLootComponent);
 
             List<string> leftKeys = left == null ? new List<string>() : new List<string>(left.Keys);
             List<string> rightKeys = right == null ? new List<string>() : new List<string>(right.Keys);
@@ -131,6 +137,12 @@ namespace Quartermaster_Integrations
             }
 
             return true;
+        }
+
+        /// <summary>Whether Epic Loot's enchant payload is ignored on stackable items.</summary>
+        private static bool IgnoreComponents()
+        {
+            return BridgePlugin.IgnoreEpicLootComponents != null && BridgePlugin.IgnoreEpicLootComponents.Value;
         }
 
         /// <summary>Custom-data keys the user considers cosmetic (comma separated in the config).</summary>

@@ -14,6 +14,10 @@ Every version that gets built is listed here, newest first — including builds 
 
 ### Added
 
+* **Epic Loot materials stack again.** Epic Loot stamps its `MagicItemComponent` onto essences and other materials, not just gear, and Quartermaster treats any custom-data difference as a different item - so an enchanted Essence would not merge with a plain one. `IgnoreEpicLootComponents` (4. Patches, default on) ignores that component when the item is stackable; gear keeps its real enchant payload and every other custom-data entry still has to match.
+
+### Added
+
 * **Chest dock actions now match what the chest allows.** `Chest Config` is hidden on chests your character cannot write - Quartermaster used to offer it and then silently drop the settings - and `Sort Chest` now claims and sorts any chest Quartermaster can reach but does not own, the same ownership claim vanilla makes when you open a chest, rather than handing it to the shared-chest handshake that needs the owner present. Works while the owner is online but elsewhere; chests another player has open are left to Quartermaster. Controlled by `AnyChestDock` (4. Patches, default on).
 
 ### Added

@@ -110,6 +110,7 @@ namespace Quartermaster_Integrations
         public static ConfigEntry<string> IgnoredStackTags;
         public static ConfigEntry<bool> MergePocketsOnSort;
         public static ConfigEntry<bool> AnyChestDock;
+        public static ConfigEntry<bool> IgnoreEpicLootComponents;
         public static ConfigEntry<bool> EnableAAABuildMenu;
         public static ConfigEntry<bool> EnableAAACrafting;
         public static ConfigEntry<bool> EnableMyLittleUI;
@@ -325,6 +326,17 @@ namespace Quartermaster_Integrations
                 "settings are silently dropped), and 'Sort Chest' also works on chests Quartermaster can " +
                 "reach but does not own - it normally hands those to a handshake that needs the owner " +
                 "present. Chests another player has open are left to Quartermaster.");
+
+            IgnoreEpicLootComponents = Config.Bind(
+                "4. Patches",
+                "IgnoreEpicLootComponents",
+                true,
+                "Epic Loot writes its MagicItemComponent onto materials as well as gear. On a stackable " +
+                "item that component carries no stacking identity, so two Essences - one enchanted, one " +
+                "plain - refused to merge because of it. With this on, the component is ignored when " +
+                "merging stackable items only; gear and every other custom-data entry still have to " +
+                "match.");
+
 
 
 
