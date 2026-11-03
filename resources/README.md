@@ -118,6 +118,7 @@ Set `DebugMode = true` under `2. Debug` and the mod writes `BepInEx/BSBLogs/Quar
 | `[WardHostRange] N container(s) reachable inside M ward bubble(s)` | what the bubble is contributing to crafting (one line per 10 s) |
 | `[Forget] 'item' removed from the chest (remembered=True, forgotten=False)` | Forget deletions when `ForgetRemovesEntry` is on (debug only) |
 | `[Stacks] merging 'item' xN (Zebzz) with xM (looted): identical apart from the crafter` | a merge `IgnoreCrafter` allowed (debug only) |
+| `[Stacks] after sorting, '$item' still has N stacks` | a sort pass ran and this item survived it as several stacks (debug only) |
 | `[WardHostRange] inside N ward bubble(s), radius …` / `outside every ward` | entry/exit of a WardIsLove ward, checked twice a second (debug only) |
 | `[WardOwnership] WardOwnership = …` | the active mode at startup (debug only) |
 | `[WardOwnership] 'container' is in a permitted ward - leaving its owner alone` | a container skipped Quartermaster's ownership request (one line per container per 10 s, debug only) |
