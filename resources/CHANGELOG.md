@@ -14,7 +14,7 @@ Every version that gets built is listed here, newest first — including builds 
 
 ### Added
 
-* **Chest dock actions now match what the chest allows.** `Chest Config` is hidden on chests your character cannot write - Quartermaster used to offer it and then silently drop the settings - and `Sort Chest` now sorts any chest Quartermaster can reach but does not own, rather than handing it to the shared-chest handshake that needs the owner online. Chests another player has open are left to Quartermaster. Controlled by `AnyChestDock` (4. Patches, default on).
+* **Chest dock actions now match what the chest allows.** `Chest Config` is hidden on chests your character cannot write - Quartermaster used to offer it and then silently drop the settings - and `Sort Chest` now claims and sorts any chest Quartermaster can reach but does not own, the same ownership claim vanilla makes when you open a chest, rather than handing it to the shared-chest handshake that needs the owner present. Works while the owner is online but elsewhere; chests another player has open are left to Quartermaster. Controlled by `AnyChestDock` (4. Patches, default on).
 
 ### Added
 
