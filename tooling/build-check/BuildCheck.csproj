@@ -36,6 +36,7 @@
     <Compile Include="../../src/craft_repaint.cs" Link="mod/craft_repaint.cs" />
     <Compile Include="../../src/pocket_merge.cs" Link="mod/pocket_merge.cs" />
     <Compile Include="../../src/chest_dock.cs" Link="mod/chest_dock.cs" />
+    <Compile Include="../../src/mail_watchdog.cs" Link="mod/mail_watchdog.cs" />
     <Compile Include="../../src/dropmoreloot_integration.cs" Link="mod/dropmoreloot_integration.cs" />
     <Compile Include="../../src/wizardry_integration.cs" Link="mod/wizardry_integration.cs" />
     <Compile Include="../../src/stack_diagnostics.cs" Link="mod/stack_diagnostics.cs" />

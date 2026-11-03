@@ -111,6 +111,7 @@ namespace Quartermaster_Integrations
         public static ConfigEntry<bool> MergePocketsOnSort;
         public static ConfigEntry<bool> AnyChestDock;
         public static ConfigEntry<bool> IgnoreEpicLootComponents;
+        public static ConfigEntry<bool> MailStaleLinkCleanup;
         public static ConfigEntry<bool> EnableAAABuildMenu;
         public static ConfigEntry<bool> EnableAAACrafting;
         public static ConfigEntry<bool> EnableMyLittleUI;
@@ -337,6 +338,16 @@ namespace Quartermaster_Integrations
                 "merging stackable items only; gear and every other custom-data entry still have to " +
                 "match.");
 
+            MailStaleLinkCleanup = Config.Bind(
+                "4. Patches",
+                "MailStaleLinkCleanup",
+                true,
+                "Quartermaster only. A mailbox remembers the parcel it is sending by ZDO id, and when " +
+                "that parcel no longer exists the mailbox reports 'Checking queued mail' forever - which " +
+                "is what a restart between saves leaves behind. With this on, the link is cleared once " +
+                "the parcel has been missing for a few seconds, so the mailbox goes back to idle.");
+
+
 
 
 
@@ -386,6 +397,7 @@ namespace Quartermaster_Integrations
             CraftRepaintPatch.Initialize(_harmony);
             PocketMerge.Initialize(_harmony);
             ChestDockPatch.Initialize(_harmony);
+            MailWatchdogPatch.Initialize(_harmony);
             WardOwnershipSkip.Initialize(_harmony);
 
             // Soft-dependency integrations set up their own patches; container-content invalidation
