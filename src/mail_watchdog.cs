@@ -23,6 +23,8 @@ namespace Quartermaster_Integrations
     /// works inside a ward and while the recorded owner is online elsewhere; a mailbox further away is
     /// only repaired if it is already ours. The mailbox then returns to idle with one line in the log
     /// instead of a stuck "Checking queued mail".
+    ///
+    /// Config: `4. Patches -> MailStaleLinkCleanup` (default on).
     /// </summary>
     public static class MailWatchdogPatch
     {
@@ -147,7 +149,7 @@ namespace Quartermaster_Integrations
 
         private static bool Check(Container mailbox, Dictionary<ZDOID, float> next)
         {
-            ZNetView view = View(mailbox);
+            ZNetView view = ContainerZdo.View(mailbox);
             if (view == null || !view.IsValid()) return false;
 
             ZDO zdo = view.GetZDO();
@@ -163,7 +165,7 @@ namespace Quartermaster_Integrations
                 if (QIDebugger.Enabled)
                 {
                     QIDebugger.LogDebug(
-                        $"[Mail] '{Name(mailbox)}' points at parcel {parcel}, which does not exist - " +
+                        $"[Mail] '{ContainerZdo.Name(mailbox)}' points at parcel {parcel}, which does not exist - " +
                         "waiting " + GraceSeconds.ToString("0") + " s before clearing the link.");
                 }
             }
@@ -189,7 +191,7 @@ namespace Quartermaster_Integrations
 
                     if (view.IsOwner() && QIDebugger.Enabled)
                     {
-                        QIDebugger.LogDebug($"[Mail] Claimed '{Name(mailbox)}' to repair its queued-mail link.");
+                        QIDebugger.LogDebug($"[Mail] Claimed '{ContainerZdo.Name(mailbox)}' to repair its queued-mail link.");
                     }
                 }
             }
@@ -199,7 +201,7 @@ namespace Quartermaster_Integrations
                 if (QIDebugger.Enabled)
                 {
                     QIDebugger.LogDebug(
-                        $"[Mail] '{Name(mailbox)}' has a stale queued-mail link to {parcel} but the mailbox " +
+                        $"[Mail] '{ContainerZdo.Name(mailbox)}' has a stale queued-mail link to {parcel} but the mailbox " +
                         "is not ours to write; leaving it alone.");
                 }
                 return false;
@@ -210,25 +212,12 @@ namespace Quartermaster_Integrations
             if (QIDebugger.Enabled)
             {
                 QIDebugger.LogDebug(
-                    $"[Mail] Cleared a stale queued-mail link on '{Name(mailbox)}' - parcel {parcel} no " +
+                    $"[Mail] Cleared a stale queued-mail link on '{ContainerZdo.Name(mailbox)}' - parcel {parcel} no " +
                     "longer exists (broken send or a restart between saves).");
             }
 
             return true;
         }
 
-        private static ZNetView View(Container c)
-        {
-            if (c == null) return null;
-            if (c.m_rootObjectOverride != null) return c.m_rootObjectOverride;
-
-            ZNetView view = c.GetComponent<ZNetView>();
-            return view != null && view.IsValid() ? view : null;
-        }
-
-        private static string Name(Container c)
-        {
-            return c == null ? "mailbox" : c.gameObject.name.Replace("(Clone)", "");
-        }
     }
 }

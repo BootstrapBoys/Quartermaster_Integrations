@@ -113,6 +113,7 @@ Set `DebugMode = true` under `2. Debug` and the mod writes `BepInEx/BSBLogs/Quar
 | `[Patch] '<target>' applied` | that reflection patch bound at startup |
 | `[Patches] <Type>.<Method> <- prefix N, postfix N, transpiler N, finalizer N` | the full inventory of methods this mod has patched — a missing one is a missing integration |
 | `[Config] DisplayMode: …` | the settings that session actually ran with |
+| `[Config] Patches: ForgetRemovesEntry=…, IgnoreCrafter=…, … WardOwnership=…` | every `4. Patches` / `5. Ward` switch as it was bound, so a log describes the code path it took |
 | `[Craft] '<item>' xN` then one row per requirement | `need N \| pockets A + storage B = C \| enough True/False` for the selected recipe |
 | `[AAABuildMenu] '<item>': pockets A + storage B = C` | a pinned row's count changed, and from what |
 | `[Integrations] EpicLoot: … PlanBuild: … WardIsLove: …` | which optional integrations bound this session |

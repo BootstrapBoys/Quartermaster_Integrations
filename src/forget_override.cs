@@ -17,6 +17,8 @@ namespace Quartermaster_Integrations
     ///
     /// Patch-only and filter-free: it never adds or moves items, and it changes nothing on a chest
     /// the player has not pressed Forget on.
+    ///
+    /// Config: `4. Patches -> ForgetRemovesEntry` (default off).
     /// </summary>
     public static class ForgetOverride
     {

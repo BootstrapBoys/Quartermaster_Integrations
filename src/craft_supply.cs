@@ -16,12 +16,16 @@ namespace Quartermaster_Integrations
     /// With this on, CanSupply() reports false for a chest whose AcceptStorage is off. That single
     /// predicate is what CraftStorageAccess.Nearby() filters on, so the chest drops out of the counts and
     /// out of the pull validation (Run/SourcesValid) at the same time.
+    ///
+    /// Config: `4. Patches -> SupplyRequiresAccept` (default on).
     /// </summary>
     public static class CraftSupplyPatch
     {
         private static MethodInfo _getSettings;
         private static FieldInfo _acceptStorage;
         private static readonly Dictionary<int, float> LastLogged = new Dictionary<int, float>();
+        private static readonly Dictionary<int, (int frame, bool accepts)> AcceptCache =
+            new Dictionary<int, (int frame, bool accepts)>();
         private const float Throttle = 60f;
 
         public static void Initialize(Harmony harmony)
@@ -69,6 +73,28 @@ namespace Quartermaster_Integrations
             }
         }
 
+        /// <summary>
+        /// CanSupply runs once per chest per supply query, and the recipe panel queries repeatedly per
+        /// frame; GetSettings is a reflection call, so the answer is memoised for the frame.
+        /// </summary>
+        private static bool Accepts(Container chest)
+        {
+            int id = chest.GetInstanceID();
+            int frame = Time.frameCount;
+
+            if (AcceptCache.TryGetValue(id, out (int frame, bool accepts) cached) && cached.frame == frame)
+            {
+                return cached.accepts;
+            }
+
+            object settings = _getSettings.Invoke(null, new object[] { chest });
+            bool accepts = settings == null || (bool)_acceptStorage.GetValue(settings);
+
+            if (AcceptCache.Count > 512) AcceptCache.Clear();   // world change, not a leak
+            AcceptCache[id] = (frame, accepts);
+            return accepts;
+        }
+
         public static bool CanSupply_Prefix(Container chest, ref bool __result)
         {
             if (BridgePlugin.SupplyRequiresAccept == null || !BridgePlugin.SupplyRequiresAccept.Value) return true;
@@ -76,10 +102,7 @@ namespace Quartermaster_Integrations
 
             try
             {
-                object settings = _getSettings.Invoke(null, new object[] { chest });
-                if (settings == null) return true;
-
-                if ((bool)_acceptStorage.GetValue(settings)) return true;
+                if (Accepts(chest)) return true;
 
                 __result = false;
 

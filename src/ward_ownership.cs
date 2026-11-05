@@ -40,6 +40,8 @@ namespace Quartermaster_Integrations
     ///  * `Always` - Quartermaster's normal request/claim everywhere.
     ///
     /// A position with no ward over it is untouched, as is anything the player is not permitted on.
+    ///
+    /// Config: `5. Ward -> WardOwnership` (default `IfOwnerOffline`).
     /// </summary>
     public static class WardOwnershipSkip
     {
@@ -129,31 +131,13 @@ namespace Quartermaster_Integrations
         }
 
         /// <summary>
-        /// True when the ZDO's owner is not one of the connected peers (or is unset) - the case where a
-        /// claim is the only way to write and cannot take a chest from anyone who is present.
+        /// True when the ZDO's owner is not a connected player (or is unset) - the case where a claim is
+        /// the only way to write and cannot take a chest from anyone who is present. The dedicated server
+        /// session does not count as present; that rule lives in ContainerZdo.
         /// </summary>
         private static bool OwnerOffline(ZNetView view)
         {
-            long owner = view.GetZDO().GetOwner();
-            if (owner == 0L) return true;
-            if (owner == ZDOMan.GetSessionID()) return false;
-
-            ZNet net = ZNet.instance;
-            if (net == null) return true;
-
-            foreach (ZNetPeer peer in net.GetPeers())
-            {
-                if (peer == null || peer.m_uid != owner) continue;
-
-                // The dedicated server owns anything it created or loaded without a player behind it.
-                // It is always "connected", but no player is holding the chest, so a claim cannot take
-                // it from anyone present - which is exactly the case that must be allowed.
-                if (peer.m_server) continue;
-
-                return false;
-            }
-
-            return true;
+            return !ContainerZdo.OwnerIsConnectedPlayer(view);
         }
     }
 }

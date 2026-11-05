@@ -17,6 +17,8 @@ namespace Quartermaster_Integrations
     /// Quartermaster itself would merge (which includes the IgnoreCrafter and IgnoredStackTags
     /// relaxations) are combined, equipped items are left alone, and then Quartermaster arranges the
     /// compacted result.
+    ///
+    /// Config: `4. Patches -> MergePocketsOnSort` (default on).
     /// </summary>
     public static class PocketMerge
     {

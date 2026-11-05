@@ -274,6 +274,22 @@ namespace Quartermaster_Integrations
                 $"FlashSpeed: {BridgePlugin.FlashSpeed?.Value}, " +
                 $"SufficientColor: #{BridgePlugin.SufficientColorHex}, " +
                 $"BatchLimit: {MultiCraftBridgeManager.GetBatchLimit()}");
+
+            // The 4. Patches / 5. Ward switches decide which behaviours a log describes; without them a
+            // report cannot be read against the code that produced it.
+            LogDebug(
+                "[Config] Patches: " +
+                $"ForgetRemovesEntry={BridgePlugin.ForgetRemovesEntry?.Value}, " +
+                $"IgnoreCrafter={BridgePlugin.IgnoreCrafter?.Value}, " +
+                $"IgnoredStackTags='{BridgePlugin.IgnoredStackTags?.Value}', " +
+                $"IgnoreEpicLootComponents={BridgePlugin.IgnoreEpicLootComponents?.Value}, " +
+                $"DeferToDropMoreLootStacks={BridgePlugin.DeferToDropMoreLootStacks?.Value}, " +
+                $"MergePocketsOnSort={BridgePlugin.MergePocketsOnSort?.Value}, " +
+                $"AnyChestDock={BridgePlugin.AnyChestDock?.Value}, " +
+                $"MailStaleLinkCleanup={BridgePlugin.MailStaleLinkCleanup?.Value}, " +
+                $"SupplyRequiresAccept={BridgePlugin.SupplyRequiresAccept?.Value}, " +
+                $"WardHostRange={BridgePlugin.WardHostRange?.Value}, " +
+                $"WardOwnership={BridgePlugin.WardOwnership?.Value}");
         }
 
         /// <summary>

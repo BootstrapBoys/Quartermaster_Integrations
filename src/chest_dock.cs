@@ -19,6 +19,8 @@ namespace Quartermaster_Integrations
     ///    sorted, so the change carries our owner revision and sticks.
     ///
     /// Chests that are in use by another player are never forced - that is Quartermaster's call.
+    ///
+    /// Config: `4. Patches -> AnyChestDock` (default on).
     /// </summary>
     public static class ChestDockPatch
     {
@@ -105,7 +107,7 @@ namespace Quartermaster_Integrations
             {
                 Container c = OpenContainer();
                 if (c == null) return;
-                if (Configurable(c)) return;
+                if (ConfigurableCached(c)) return;
                 SetButtonActive(ConfigButton, false);
                 Note(c);
             }
@@ -138,7 +140,7 @@ namespace Quartermaster_Integrations
                 // Ownership is a revision race the server arbitrates: claiming bumps our revision, the
                 // server keeps the highest, and vanilla does the same the moment a player opens a chest.
                 // Claiming first is what makes the sort stick while the current owner is online but away.
-                ZNetView view = View(c);
+                ZNetView view = ContainerZdo.View(c);
                 bool claimed = false;
                 if (view != null && !view.IsOwner())
                 {
@@ -152,7 +154,7 @@ namespace Quartermaster_Integrations
                 if (QIDebugger.Enabled)
                 {
                     QIDebugger.LogDebug(
-                        $"[ChestDock] Sorted '{ContainerRegistryName(c)}' even though it is not ours to write" +
+                        $"[ChestDock] Sorted '{ContainerZdo.Name(c)}' even though it is not ours to write" +
                         (claimed ? " (claimed it first)." : "."));
                 }
 
@@ -165,22 +167,32 @@ namespace Quartermaster_Integrations
             }
         }
 
+        private static int _cachedId;
+        private static int _cachedFrame = -1;
+        private static bool _cachedConfigurable;
+
+        /// <summary>LayoutActions runs every frame; Accessible() can register and invoke CheckAccess.</summary>
+        private static bool ConfigurableCached(Container c)
+        {
+            int id = c.GetInstanceID();
+            int frame = Time.frameCount;
+
+            if (id == _cachedId && frame == _cachedFrame) return _cachedConfigurable;
+
+            bool value = Configurable(c);
+            _cachedId = id;
+            _cachedFrame = frame;
+            _cachedConfigurable = value;
+            return value;
+        }
+
         private static bool Configurable(Container c)
         {
             if (c == null || c.GetInventory() == null) return false;
             if (!(bool)_accessible.Invoke(null, new object[] { c })) return false;
 
-            ZNetView view = View(c);
+            ZNetView view = ContainerZdo.View(c);
             return view != null && (bool)_canWrite.Invoke(null, new object[] { view });
-        }
-
-        private static ZNetView View(Container c)
-        {
-            if (c == null) return null;
-            if (c.m_rootObjectOverride != null) return c.m_rootObjectOverride;
-
-            ZNetView view = c.GetComponent<ZNetView>();
-            return view != null && view.IsValid() ? view : null;
         }
 
         private static Container OpenContainer()
@@ -201,17 +213,12 @@ namespace Quartermaster_Integrations
             if (button.gameObject.activeSelf != active) button.gameObject.SetActive(active);
         }
 
-        private static string ContainerRegistryName(Container c)
-        {
-            return c == null ? "container" : c.gameObject.name.Replace("(Clone)", "");
-        }
-
         /// <summary>One line per chest, not per frame.</summary>
         private static void Note(Container c)
         {
             if (!QIDebugger.Enabled) return;
 
-            string name = ContainerRegistryName(c);
+            string name = ContainerZdo.Name(c);
             if (name == _lastNote && Time.unscaledTime < _nextNote) return;
 
             _lastNote = name;

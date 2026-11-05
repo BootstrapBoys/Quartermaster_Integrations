@@ -16,6 +16,8 @@ namespace Quartermaster_Integrations
     /// materials, where it has no bearing on stacking. Quality, variant, world level, durability and
     /// every other custom-data entry must still match, so gear, Epic Loot world levels and real enchant
     /// data keep Quartermaster's rule untouched.
+    ///
+    /// Config: `4. Patches -> IgnoreCrafter`, `IgnoredStackTags`, `IgnoreEpicLootComponents`.
     /// </summary>
     public static class StackCrafterPatch
     {

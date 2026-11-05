@@ -251,17 +251,14 @@ namespace Quartermaster_Integrations
         {
             try
             {
-                ZNetView view = chest.m_rootObjectOverride != null
-                    ? chest.m_rootObjectOverride
-                    : chest.GetComponent<ZNetView>();
-
-                if (view == null || !view.IsValid()) return " view=invalid";
+                ZNetView view = ContainerZdo.View(chest);
+                if (view == null) return " view=invalid";
 
                 ZDO zdo = view.GetZDO();
                 long owner = zdo.GetOwner();
                 string who = view.IsOwner() ? "self"
                     : owner == 0L ? "none"
-                    : ServerOwns(owner) ? "server"
+                    : ContainerZdo.OwnerIsServer(view) ? "server"
                     : "peer:" + owner;
 
                 return $" owner={who} inUse={chest.IsInUse()} zdoInUse={zdo.GetInt("inUse", 0)}";
@@ -270,19 +267,6 @@ namespace Quartermaster_Integrations
             {
                 return "";
             }
-        }
-
-        private static bool ServerOwns(long uid)
-        {
-            ZNet net = ZNet.instance;
-            if (net == null) return false;
-
-            foreach (ZNetPeer peer in net.GetPeers())
-            {
-                if (peer != null && peer.m_uid == uid && peer.m_server) return true;
-            }
-
-            return false;
         }
 
         private static List<string> Remembered(object settings, FieldInfo field = null)

@@ -26,6 +26,8 @@ namespace Quartermaster_Integrations
     ///  * RebuildNetworks                   - merge deposit chests that share a ward into one network
     ///  * CraftStorageAccess.Nearby         - the source list behind counts, max-craft and CraftStores
     ///  * SharedCrafting.SourcesValid       - the validation a craft must pass before it pulls
+    ///
+    /// Config: `5. Ward -> WardHostRange` (default on).
     /// </summary>
     public static class WardHostRange
     {
