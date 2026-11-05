@@ -112,6 +112,7 @@ namespace Quartermaster_Integrations
         public static ConfigEntry<bool> AnyChestDock;
         public static ConfigEntry<bool> IgnoreEpicLootComponents;
         public static ConfigEntry<bool> MailStaleLinkCleanup;
+        public static ConfigEntry<bool> CraftSupplyClaims;
         public static ConfigEntry<bool> EnableAAABuildMenu;
         public static ConfigEntry<bool> EnableAAACrafting;
         public static ConfigEntry<bool> EnableMyLittleUI;
@@ -347,6 +348,18 @@ namespace Quartermaster_Integrations
                 "is what a restart between saves leaves behind. With this on, the link is cleared once " +
                 "the parcel has been missing for a few seconds, so the mailbox goes back to idle.");
 
+            CraftSupplyClaims = Config.Bind(
+                "4. Patches",
+                "CraftSupplyClaims",
+                true,
+                "Quartermaster only. It counts a chest as craft supply whenever it can read it, but a pull " +
+                "only sticks when the chest's ZDO is ours. A chest with 'Receive matching items' off is " +
+                "never a deposit destination, so Quartermaster never claims it - its materials show as " +
+                "available and then cannot be used. With this on, supply chests whose owner is not a " +
+                "connected player (or is the dedicated server session) are claimed before the pull, the " +
+                "same claim vanilla makes when you open a chest.");
+
+
 
 
 
@@ -398,6 +411,7 @@ namespace Quartermaster_Integrations
             PocketMerge.Initialize(_harmony);
             ChestDockPatch.Initialize(_harmony);
             MailWatchdogPatch.Initialize(_harmony);
+            CraftSupplyPatch.Initialize(_harmony);
             WardOwnershipSkip.Initialize(_harmony);
 
             // Soft-dependency integrations set up their own patches; container-content invalidation
