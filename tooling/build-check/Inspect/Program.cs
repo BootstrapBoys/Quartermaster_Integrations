@@ -76,8 +76,6 @@ internal static class Program
         // ---- Quartermaster 0.1.65 (pack runs 0.1.66; nearest published build) -------------------
         var qm = Load(mlc, Path.Combine(Mods, "Quartermaster.dll"));
         Method(qm, "Quartermaster.WarehouseService", "CountAvailableNearPlayer", new[] { "String", "Int32", "Boolean" }, "Int32", true);
-        Method(qm, "Quartermaster.CraftStorageAccess", "Run",
-            new[] { "String", "Container[]", "Func`1", "Action", "Action`1", "Action" }, "Boolean", true);
         Method(qm, "Quartermaster.CraftStorageAccess", "CanSupply",
             new[] { "Container" }, "Boolean", true);
         Method(qm, "Quartermaster.PostalDirectory", "Update", Array.Empty<string>(), "Void", false);

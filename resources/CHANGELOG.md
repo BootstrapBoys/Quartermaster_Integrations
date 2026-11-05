@@ -26,7 +26,7 @@ Every version that gets built is listed here, newest first — including builds 
 
 ### Fixed
 
-* **Supply-only chests are usable again.** Quartermaster counts a chest for crafting whenever it can read it, but the materials only come out if the chest's ZDO is yours - and a chest with `Receive matching items` off never becomes a deposit destination, so nothing ever claimed it. Its contents showed as available and the craft could not use them. `CraftSupplyClaims` (4. Patches, default on) claims the supply chests just before the pull when their owner is not a connected player, the same claim vanilla makes when you open a chest; a chest owned by a player who is online is left alone and now says so in the debug log.
+* **"Receive matching items" off now means the chest is not a resource source.** Quartermaster's supply check only asked whether a chest could be read, so a chest explicitly taken out of the storage system still had its contents counted in the recipe panel. `SupplyRequiresAccept` (4. Patches, default on) makes `CanSupply` false for those chests, which drops them from both the counts and the pull validation.
 
 ### Fixed
 
