@@ -13,10 +13,10 @@ namespace Quartermaster_Integrations
     ///
     /// Quartermaster builds that status from Automation.Destinations(...).Count == 0, and Destinations
     /// rejects a chest for any of four reasons: it is the source, CanTransfer(sourcePoint, chest)
-    /// fails, FurnitureAssignment.Accepts(chest, item) fails, or Writable(chest, item) fails
-    /// (capacity or a busy chest). CanTransfer is also the method the WardIsLove rule patches, so a
-    /// warded base can lose every destination if the bubble is wrong - this distinguishes that from a
-    /// full or mismatched chest.
+    /// fails, FurnitureAssignment.Accepts(chest, item) fails, or Writable(chest, item) fails - no
+    /// capacity, the chest is busy, or its ZDO is not ours to write. CanTransfer is also the method the
+    /// WardIsLove rule patches, so a warded base can lose every destination if the bubble is wrong; the
+    /// owner=/inUse= fields on each blocked line tell the remaining three apart.
     ///
     /// Reads only; it never changes routing.
     /// </summary>

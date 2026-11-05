@@ -18,8 +18,11 @@ namespace Quartermaster_Integrations
     /// nothing. Pending() then reports mail forever and the mailbox refuses new work.
     ///
     /// This sweeps registered mailboxes every couple of seconds, and when a link has pointed at a missing
-    /// parcel for longer than the grace period it clears the link (only if the mailbox is ours to write),
-    /// so the mailbox returns to idle with one line in the log instead of a stuck "Checking queued mail".
+    /// parcel for longer than the grace period it clears the link. A mailbox within ClaimRange of the
+    /// player is claimed first (the same claim vanilla makes when a chest is opened), so the repair also
+    /// works inside a ward and while the recorded owner is online elsewhere; a mailbox further away is
+    /// only repaired if it is already ours. The mailbox then returns to idle with one line in the log
+    /// instead of a stuck "Checking queued mail".
     /// </summary>
     public static class MailWatchdogPatch
     {

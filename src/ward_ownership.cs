@@ -21,18 +21,23 @@ namespace Quartermaster_Integrations
     }
 
     /// <summary>
-    /// Stops Quartermaster from taking ownership of containers that sit in a WardIsLove ward the
-    /// player is permitted on.
+    /// Decides how far Quartermaster may go to own containers inside a WardIsLove ward the player is
+    /// permitted on.
     ///
     /// Quartermaster asks a chest's current owner to hand the ZDO over, and if three requests go
-    /// unanswered it claims the chest from the server. In a shared base that means a permitted
-    /// visitor can end up owning the ward owner's chests - and the owner then has to take them back.
+    /// unanswered it claims the chest from the server. In a shared base that means a permitted visitor
+    /// can end up owning the ward owner's chests - and the owner then has to take them back.
     ///
-    /// With `WardPermittedSkipsOwnership` on, Request() reports the container as settled for any
-    /// object inside a ward the player is permitted on: no request, no claim, ownership stays where
-    /// it is. Reads are still correct because Quartermaster deserialises the ZDO's item array when it
-    /// does not own a container; writes (deposits, machine collection, store-all) still require real
-    /// ownership and fall back to Quartermaster's own "storage is not locally available" message.
+    /// `WardOwnership` has three modes, evaluated for any object inside a permitted ward:
+    ///  * `Never` - Request() reports the container as settled: no request, no claim, ownership stays
+    ///    where it is. Reads still work (Quartermaster deserialises the ZDO item array when it does not
+    ///    own a container); writes fall back to "storage is not locally available".
+    ///  * `IfOwnerOffline` (default) - skip while the recorded owner is a connected *player*; otherwise
+    ///    let Quartermaster run its normal request/claim, so deposits and machine collection keep
+    ///    working while that owner is away. The dedicated server session does not count as present: it
+    ///    owns everything it loaded and is always connected, so treating it as an owner would skip the
+    ///    claim forever after a restart.
+    ///  * `Always` - Quartermaster's normal request/claim everywhere.
     ///
     /// A position with no ward over it is untouched, as is anything the player is not permitted on.
     /// </summary>
