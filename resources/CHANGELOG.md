@@ -6,21 +6,15 @@ Every version that gets built is listed here, newest first — including builds 
 
 ---
 
-## [2.7.6] - 2026-11-03
+## [2.7.6] - 2026-11-05
 
 ### Added
 
 * **Stamped materials stack again.** Some admin panels stamp items with an `ap_prov` provenance entry, which made stamped and unstamped fine wood (and anything else stamped) refuse to merge. `IgnoredStackTags` (4. Patches, default `ap_prov`) lists custom-data keys to ignore for stackable items; every other entry, quality, world level and durability must still match.
 
-### Added
-
 * **Epic Loot materials stack again.** Epic Loot stamps its `MagicItemComponent` onto essences and other materials, not just gear, and Quartermaster treats any custom-data difference as a different item - so an enchanted Essence would not merge with a plain one. `IgnoreEpicLootComponents` (4. Patches, default on) ignores that component when the item is stackable; gear keeps its real enchant payload and every other custom-data entry still has to match.
 
-### Added
-
 * **Chest dock actions now match what the chest allows.** `Chest Config` is hidden on chests your character cannot write - Quartermaster used to offer it and then silently drop the settings - and `Sort Chest` now claims and sorts any chest Quartermaster can reach but does not own, the same ownership claim vanilla makes when you open a chest, rather than handing it to the shared-chest handshake that needs the owner present. Works while the owner is online but elsewhere; chests another player has open are left to Quartermaster. Controlled by `AnyChestDock` (4. Patches, default on).
-
-### Added
 
 * **Sorting your inventory now merges duplicate stacks.** Quartermaster's sort only rearranges slots, and its merge routine runs for chests but never for pockets, so two stacks of the same iron sat untouched however often you sorted. `MergePocketsOnSort` (4. Patches, default on) combines identical pocket stacks first - honouring `IgnoreCrafter` and `IgnoredStackTags`, skipping equipped items - and then lets Quartermaster arrange the compacted result.
 
@@ -28,15 +22,9 @@ Every version that gets built is listed here, newest first — including builds 
 
 * **"Receive matching items" off now means the chest is not a resource source.** Quartermaster's supply check only asked whether a chest could be read, so a chest explicitly taken out of the storage system still had its contents counted in the recipe panel. `SupplyRequiresAccept` (4. Patches, default on) makes `CanSupply` false for those chests, which drops them from both the counts and the pull validation.
 
-### Fixed
-
 * **Permitted-ward chests stayed unwritable after a restart.** `WardOwnership = IfOwnerOffline` skipped any container whose recorded owner was a connected peer - but on a dedicated server that is the server session, which owns everything it loads and is always connected. Every chest in the ward was therefore skipped forever, so deposits, machine collection and sorting refused with Quartermaster's "close its lid and check access" message. The server session no longer counts as a present owner; a real connected player still does. The routing diagnostic now prints `owner=`, `inUse=` and `zdoInUse=` so an ownership refusal is not mistaken for a chest left open.
 
-### Fixed
-
 * **Mailboxes no longer stick on "Checking queued mail" after a restart.** A mailbox stores its outgoing parcel by ZDO id and Quartermaster reports that status whenever the parcel cannot be found - but it never clears the link, so a send interrupted between saves left the mailbox reporting queued mail forever and refusing new work. `MailStaleLinkCleanup` (4. Patches, default on) clears a link that has pointed at a missing parcel for a few seconds, claiming the mailbox first when it is within 30 m, the same claim vanilla makes when you open a chest.
-
-### Fixed
 
 * **The recipe list no longer stays dimmed after a craft.** Crafting consumes materials, but the list was only painted when it was built, so every recipe could keep looking unaffordable while the craft button - which reads live counts - still worked. The panel now repaints once each craft finishes, with the count cache invalidated first.
 
