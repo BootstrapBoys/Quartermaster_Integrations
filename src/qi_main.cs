@@ -78,7 +78,7 @@ namespace Quartermaster_Integrations
         //
         // Versioning: bug fixes bump the patch digit (2.4.2 -> 2.4.3); adding an integration bumps the
         // minor and resets the patch (2.4.3 -> 2.5.0). Every bump gets a changelog entry.
-        public const string PluginVersion = "2.7.6";
+        public const string PluginVersion = "2.7.7";
 
         public const string QuartermasterGUID = "local.valheim.quartermaster";
         public const string MLUIGUID = "shudnal.MyLittleUI";
@@ -113,6 +113,7 @@ namespace Quartermaster_Integrations
         public static ConfigEntry<bool> IgnoreEpicLootComponents;
         public static ConfigEntry<bool> MailStaleLinkCleanup;
         public static ConfigEntry<bool> SupplyRequiresAccept;
+        public static ConfigEntry<bool> KeepDockOffSlots;
         public static ConfigEntry<bool> EnableAAABuildMenu;
         public static ConfigEntry<bool> EnableAAACrafting;
         public static ConfigEntry<bool> EnableMyLittleUI;
@@ -357,6 +358,17 @@ namespace Quartermaster_Integrations
                 "shows its contents as available. With this on, a chest with 'Receive matching items' off " +
                 "is not supply at all: it is dropped from the recipe counts and from the pull validation.");
 
+            KeepDockOffSlots = Config.Bind(
+                "4. Patches",
+                "KeepDockOffSlots",
+                true,
+                "Quartermaster only. Its chest dock is positioned from the panel it parents to, which does " +
+                "not know about rows added by another inventory mod - so the Sort Inventory button can sit " +
+                "on the new bottom row. With this on, the dock is measured against the actual slot cells " +
+                "(InventoryGrid elements) and moved down only when it overlaps one. Quartermaster's own " +
+                "Sort Inventory offsets (ledger, Interface) still apply on top.");
+
+
 
 
 
@@ -411,6 +423,7 @@ namespace Quartermaster_Integrations
             ChestDockPatch.Initialize(_harmony);
             MailWatchdogPatch.Initialize(_harmony);
             CraftSupplyPatch.Initialize(_harmony);
+            DockClearancePatch.Initialize(_harmony);
             WardOwnershipSkip.Initialize(_harmony);
 
             // Soft-dependency integrations set up their own patches; container-content invalidation

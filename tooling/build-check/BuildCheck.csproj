@@ -39,6 +39,7 @@
     <Compile Include="../../src/mail_watchdog.cs" Link="mod/mail_watchdog.cs" />
     <Compile Include="../../src/craft_supply.cs" Link="mod/craft_supply.cs" />
     <Compile Include="../../src/container_zdo.cs" Link="mod/container_zdo.cs" />
+    <Compile Include="../../src/dock_clearance.cs" Link="mod/dock_clearance.cs" />
     <Compile Include="../../src/dropmoreloot_integration.cs" Link="mod/dropmoreloot_integration.cs" />
     <Compile Include="../../src/wizardry_integration.cs" Link="mod/wizardry_integration.cs" />
     <Compile Include="../../src/stack_diagnostics.cs" Link="mod/stack_diagnostics.cs" />

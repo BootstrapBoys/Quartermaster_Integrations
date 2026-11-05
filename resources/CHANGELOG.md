@@ -6,6 +6,12 @@ Every version that gets built is listed here, newest first — including builds 
 
 ---
 
+## [2.7.7] - 2026-11-05
+
+### Fixed
+
+* **The Sort Inventory button no longer sits on an expanded inventory row.** Quartermaster positions its chest dock from the panel it parents to, which does not account for rows added by another inventory mod - ExtraSlots' boss rows plus an expanded grid left the dock, and the Sort Inventory button, on top of the new bottom row. `KeepDockOffSlots` (4. Patches, default on) measures the dock against the actual slot cells and moves it down only when it overlaps one. Quartermaster's own Sort Inventory offsets (ledger, Interface) still apply on top.
+
 ## [2.7.6] - 2026-11-05
 
 ### Added
