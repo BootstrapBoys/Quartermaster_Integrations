@@ -107,12 +107,12 @@ cp -f "$BEPINEX_CORE/"*.dll refs/game/BepInEx/core/
 
 # Optional integrations the binding audit checks. They are deliberately NOT manifest dependencies,
 # so their pins live here and get bumped when the audit is re-run against a newer build.
-MYLITTLEUI_PKG="shudnal-MyLittleUI-1.2.33"
-EXTRASLOTS_PKG="shudnal-ExtraSlots-1.2.21"
+MYLITTLEUI_PKG="shudnal-MyLittleUI-1.2.34"
+EXTRASLOTS_PKG="shudnal-ExtraSlots-1.2.24"
 ADVENTUREBACKPACKS_PKG="Vapok-AdventureBackpacks-2.4.6"
 AAA_VERSION="2.1.12"
 AAABUILDMENU_VERSION="1.0.6"
-EPICLOOT_PKG="RandyKnapp-EpicLoot-0.15.5"
+EPICLOOT_PKG="RandyKnapp-EpicLoot-0.15.6"
 PLANBUILD_PKG="MathiasDecrock-PlanBuild-0.20.0"
 WARDISLOVE_VERSION="4.0.9"
 DROPMORELOOT_PKG="TastyChickenLegs-DropMoreLoot-1.2.9"

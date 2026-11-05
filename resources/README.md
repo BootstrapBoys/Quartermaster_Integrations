@@ -23,11 +23,11 @@ Puts Quartermaster's nearby storage into the crafting window: how much of each i
 | :--- | :--- | :--- |
 | **Quartermaster** (`local.valheim.quartermaster`) | **Yes** — 0.1.66+ | The source of every storage count |
 | **AAA Crafting** (`Azumatt.AzuAntiArthriticCrafting`) | No — 2.1.12+ | Craft-amount input, Max Craft label, batch cap of 100 |
-| **My Little UI** (`shudnal.MyLittleUI`) | No — 1.2.32–1.2.33 | Craft-amount input, batch cap of 99 |
-| **ExtraSlots** (`shudnal.ExtraSlots`) | No — 1.2.21+ | Slot rows and typed slots survive Quartermaster's sort/store |
+| **My Little UI** (`shudnal.MyLittleUI`) | No — 1.2.32–1.2.34 | Craft-amount input, batch cap of 99 |
+| **ExtraSlots** (`shudnal.ExtraSlots`) | No — 1.2.21–1.2.24 | Slot rows and typed slots survive Quartermaster's sort/store |
 | **AdventureBackpacks** (`vapok.mods.adventurebackpacks`) | No — 2.4.6+ | Backpack contents excluded from counts, backpack proxy never a store target |
 | **AAABuildMenu** (`Azumatt.AAABuildMenu`) | No — 1.0.6+ | Pinned build rows show storage-inclusive have/need counts |
-| **Epic Loot** (`randyknapp.mods.epicloot`) | No — 0.15.5+ | Enchanting and sacrifice costs can be paid from storage; the items are actually taken from the chests. **Not compatible with EpicLootContainerBridge** — that bridge already reports storage, so the provider stays off while it is installed |
+| **Epic Loot** (`randyknapp.mods.epicloot`) | No — 0.15.5–0.15.6 | Enchanting and sacrifice costs can be paid from storage; the items are actually taken from the chests. **Not compatible with EpicLootContainerBridge** — that bridge already reports storage, so the provider stays off while it is installed |
 | **PlanBuild** (`marcopogo.PlanBuild`) | No — 0.20.0+ | Plan pieces can be placed from storage, including "hold to add materials" |
 | **WardIsLove** (`Azumatt.WardIsLove`) | No — 4.0.9+ | Chests inside a ward you are not permitted on are excluded from counts and never pulled from; a Deposit Chest inside a ward runs its whole base on that bubble (`WardHostRange`); permitted containers keep their owner instead of being claimed (`WardOwnership`) |
 | **DropMoreLoot** (`TastyChickenLegs.DropMoreLoot`) | No — 1.2.9+ | Its stack multiplier is respected; Quartermaster's stack override steps aside (`DeferToDropMoreLootStacks`) and the ledger's stack-size toggle is disabled and labelled with DropMoreLoot's multiplier |
