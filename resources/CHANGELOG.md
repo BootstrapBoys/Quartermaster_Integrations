@@ -6,6 +6,16 @@ Every version that gets built is listed here, newest first — including builds 
 
 ---
 
+## [2.7.8] - 2026-11-09
+
+### Added
+
+* **Deposit All works on any container.** Quartermaster only offers it for its own deposit chests, so an ordinary chest had no way to store everything at once. `ContainerFixes` now stores your items into whatever container is open, keeping the hotbar and equipment, and claims the container first when its owner is away (the same claim vanilla makes when you open a chest). A container another player has open is still left alone.
+
+### Changed
+
+* **The chest-dock fixes are one setting: `ContainerFixes`.** It replaces 2.7.7's `AnyChestDock` and covers all three behaviours together: `Chest Config` is only offered where the settings can actually be saved, while `Sort Chest` and `Deposit All` work on any accessible container. The old value is carried over on first start and the orphan key is removed.
+
 ## [2.7.7] - 2026-11-05
 
 ### Fixed

@@ -78,7 +78,7 @@ namespace Quartermaster_Integrations
         //
         // Versioning: bug fixes bump the patch digit (2.4.2 -> 2.4.3); adding an integration bumps the
         // minor and resets the patch (2.4.3 -> 2.5.0). Every bump gets a changelog entry.
-        public const string PluginVersion = "2.7.7";
+        public const string PluginVersion = "2.7.8";
 
         public const string QuartermasterGUID = "local.valheim.quartermaster";
         public const string MLUIGUID = "shudnal.MyLittleUI";
@@ -109,7 +109,7 @@ namespace Quartermaster_Integrations
         public static ConfigEntry<bool> IgnoreCrafter;
         public static ConfigEntry<string> IgnoredStackTags;
         public static ConfigEntry<bool> MergePocketsOnSort;
-        public static ConfigEntry<bool> AnyChestDock;
+        public static ConfigEntry<bool> ContainerFixes;
         public static ConfigEntry<bool> IgnoreEpicLootComponents;
         public static ConfigEntry<bool> MailStaleLinkCleanup;
         public static ConfigEntry<bool> SupplyRequiresAccept;
@@ -320,15 +320,28 @@ namespace Quartermaster_Integrations
                 "IgnoreCrafter and IgnoredStackTags), equipped items are left alone, then Quartermaster " +
                 "arranges the result.");
 
-            AnyChestDock = Config.Bind(
+            ContainerFixes = Config.Bind(
                 "4. Patches",
-                "AnyChestDock",
+                "ContainerFixes",
                 true,
-                "Quartermaster only. Two fixes to its chest dock, which offers actions it cannot always " +
-                "deliver: 'Chest Config' is hidden on chests the player cannot write (otherwise the " +
-                "settings are silently dropped), and 'Sort Chest' also works on chests Quartermaster can " +
-                "reach but does not own - it normally hands those to a handshake that needs the owner " +
-                "present. Chests another player has open are left to Quartermaster.");
+                "Quartermaster only. Makes its chest dock match what a container can actually do: " +
+                "'Chest Config' is hidden where the settings cannot take effect (not accessible, not " +
+                "writable, so they would be silently dropped); 'Sort Chest' works on any accessible " +
+                "container, claiming it first when the owner is away; and 'Deposit All' stores your items " +
+                "into any open container, not only Quartermaster deposit chests. Chests another player has " +
+                "open are left to Quartermaster.");
+
+            // 2.7.7 shipped this as AnyChestDock. Carry the old value over and remove the orphan key.
+            ConfigEntry<bool> legacyAnyChestDock = Config.Bind(
+                "4. Patches", "AnyChestDock", true,
+                "Legacy key - moved to ContainerFixes. Removed on next start.");
+
+            if (!legacyAnyChestDock.Value)
+            {
+                ContainerFixes.Value = false;
+            }
+
+            Config.Remove(legacyAnyChestDock.Definition);
 
             IgnoreEpicLootComponents = Config.Bind(
                 "4. Patches",

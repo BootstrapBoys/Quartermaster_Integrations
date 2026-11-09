@@ -78,6 +78,7 @@ internal static class Program
         Method(qm, "Quartermaster.WarehouseService", "CountAvailableNearPlayer", new[] { "String", "Int32", "Boolean" }, "Int32", true);
         Method(qm, "Quartermaster.CraftStorageAccess", "CanSupply",
             new[] { "Container" }, "Boolean", true);
+        Method(qm, "Quartermaster.ChestUi", "DepositAll", Array.Empty<string>(), "Void", true);
         Method(qm, "Quartermaster.PostalDirectory", "Update", Array.Empty<string>(), "Void", false);
         Method(qm, "Quartermaster.PostalMailbox", "IsMailbox",
             new[] { "Container" }, "Boolean", true);

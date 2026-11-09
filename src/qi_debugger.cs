@@ -285,7 +285,7 @@ namespace Quartermaster_Integrations
                 $"IgnoreEpicLootComponents={BridgePlugin.IgnoreEpicLootComponents?.Value}, " +
                 $"DeferToDropMoreLootStacks={BridgePlugin.DeferToDropMoreLootStacks?.Value}, " +
                 $"MergePocketsOnSort={BridgePlugin.MergePocketsOnSort?.Value}, " +
-                $"AnyChestDock={BridgePlugin.AnyChestDock?.Value}, " +
+                $"ContainerFixes={BridgePlugin.ContainerFixes?.Value}, " +
                 $"MailStaleLinkCleanup={BridgePlugin.MailStaleLinkCleanup?.Value}, " +
                 $"SupplyRequiresAccept={BridgePlugin.SupplyRequiresAccept?.Value}, " +
                 $"WardHostRange={BridgePlugin.WardHostRange?.Value}, " +
